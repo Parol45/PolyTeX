@@ -21,26 +21,43 @@ header {
     height: 100%;
 }
 
-.source-wrap, .result-wrap{
+.main-panel {
     display: inline-block;
     vertical-align: top;
     padding: 0;
     margin: 0;
     height: 93%;
-    width: 50%;
     outline: none;
     overflow: auto;
 }
 
-.source-wrap {
+#source-wrap {
     background-color: whitesmoke;
+    width: 42%;
 }
 
-.result-wrap{
+#result-wrap {
     background-color: grey;
+    width: 50%;
+}
+
+#file-list-wrap {
+    width: 8%;
+    background-color: black;
+}
+
+#file-list-wrap > div {
+    background-color: lightgoldenrodyellow;
+    width: 99%;
+    height: 100%;
 }
 
 .document {
     width: 100%;
     height: 100%;
+}
+
+#upload-butt {
+    border: 2px solid black;
+    horiz-align: center;
 }

@@ -1,6 +1,9 @@
-package ru.test.restservice;
+package ru.test.restservice.api;
 
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import ru.test.restservice.domain.CompilationResult;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,12 +13,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static ru.test.restservice.RestServiceApplication.isWindows;
+import static ru.test.restservice.MainApplication.isWindows;
 
+//TODO: после авторизации связать компиляцию с рабочей папкой
 
 @RestController
 public class CompileController {
 
+    //TODO: заменить записью изменений после компиляции/каждые N секунд работы с проектом
     private void createTexFile(String text) {
         Path path = Paths.get("test/test.tex");
         try {
@@ -31,6 +36,7 @@ public class CompileController {
         }
     }
 
+    // Результирующий пдф закидывается в рабочую папку юзера
     private String compileTexFile(){
         StringBuilder message = new StringBuilder();
         try {
@@ -56,7 +62,7 @@ public class CompileController {
         return message.toString();
     }
 
-    @PostMapping(value = "/api/compile")
+    @PostMapping("/api/compile")
     public CompilationResult compileSourceTexCode(@RequestBody String textInp) {
         createTexFile(textInp);
         String compRet = compileTexFile();
