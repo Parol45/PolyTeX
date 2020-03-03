@@ -3,7 +3,7 @@ package ru.test.restservice;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-//До сих пор без понятия, что тут происходит
+// До сих пор без понятия, что тут происходит
 @SpringBootApplication
 public class MainApplication {
     public static boolean isWindows;

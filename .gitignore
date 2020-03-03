@@ -21,7 +21,7 @@
 *.rar
 
 #other
-./test/*
+/test/*
 *.aux
 *.pdf
 *.bat
@@ -29,3 +29,9 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+/test/test.log
+/test/test.pdf
+/test/test.synctex.gz
+/test/test.tex
+/test/
+/test/

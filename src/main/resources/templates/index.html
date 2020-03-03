@@ -7,7 +7,6 @@
     <link rel="shortcut icon" type="image/png" href="../static/favicon.png" th:href="@{/favicon.png}">
     <link rel="icon" type="image/png" href="../static/favicon.png" th:href="@{/favicon.png}">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="../static/src/ask_compile.js" th:src="@{/src/ask_compile.js}"></script>
 </head>
 
@@ -15,36 +14,21 @@
 <header>
     <h1>Latex editor</h1>
     <button class="compile-butt" ng-click="sendForCompilation()">Compile</button>
+    <button class="save-butt" ng-click="saveDoc()">Save</button>
 </header>
 <div class="main-panel" id="file-list-wrap">
     <div>
         <input id="upload-file" type="file" onchange="angular.element(this).scope().uploadFile(this.files[0])"
                hidden="true">
         <label for="upload-file" id="upload-butt">Upload file</label>
-        <ul id="file-list" ng-repeat="doc in docs">
-            <li id="li-{{doc.name}}"><a href="https://codepen.io/takei/pen/eMNPNL">{{doc.name}}</a></li>
+        <ul id="file-list" ng-repeat="file in files">
+            <li onclick="angular.element(this).scope().showFile(this)" id="li-{{file.name}}"><a href>{{file.name}}</a>
+            </li>
         </ul>
     </div>
-</div><!--между этими тегами не должно быть ничего-->
-<div class="main-panel" id="source-wrap" contenteditable>
-    <div>\documentclass[a4paper,12pt]{article}</div>
-    <div>\usepackage{cmap}</div>
-    <div>\usepackage{mathtext}</div>
-    <div>\usepackage[T2A]{fontenc}</div>
-    <div>\usepackage[utf8]{inputenc}</div>
-    <div>\usepackage[english,russian]{babel}</div>
-    <div>\begin{document}</div>
-    <div>Hello</div>
-    <div>\[S\Theta = \rho;\;ST = \rho_1;\;SL = \rho_2;\;TL = r\]</div>
-    <div>\begin{tabular}{ l l l }</div>
-    <div>ИСЗ & Дата запуска & Масса, кг \\</div>
-    <div>Спутник-1 & 4 октября 1957 & 83.6 \\</div>
-    <div>Спутник-2 & 3 ноября 1957 & 508.3 \\</div>
-    <div>Эксплорер-1 & 1 февраля 1958 & 21.5 \\</div>
-    <div>\end{tabular}</div>
-    <div>\end{document}</div>
-</div><!--между этими тегами не должно быть ничего-->
-<div class="main-panel" id="result-wrap">
+</div><!--между этими тегами не должно быть ничего--><div class="main-panel" id="source-wrap" contenteditable>
+
+</div><!--между этими тегами не должно быть ничего--><div class="main-panel" id="result-wrap">
 </div>
 
 </body>
