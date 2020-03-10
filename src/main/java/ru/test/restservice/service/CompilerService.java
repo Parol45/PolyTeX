@@ -1,8 +1,8 @@
 package ru.test.restservice.service;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.stereotype.Service;
 import ru.test.restservice.dto.CompilationResultDTO;
+import ru.test.restservice.exceptions.CompilationException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,20 +15,11 @@ import java.nio.file.Paths;
 
 import static ru.test.restservice.MainApplication.isWindows;
 
+@Service
 public class CompilerService {
 
     // TODO: после добавления авторизации связать компиляцию с рабочей папкой и компилировать по filename
-    public static String workingFolder = "test";
-
-    // TODO: перенести все эксепшны в хандлер
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public static class CompilationException extends RuntimeException {
-        public CompilationException(String message) {
-            super(message);
-        }
-    }
-
-    // TODO: добавить функцию сохранения изменений в файле
+    public String workingFolder = "test";
 
     /**
      * Метод, создающий в папке пользователя новый .tex файл
@@ -36,7 +27,7 @@ public class CompilerService {
      *
      * @param text содержимое создаваемого .tex файла
      */
-    public static void createTexFile(String text) throws IOException {
+    public void createTexFile(String text) throws IOException {
         Path path = Paths.get("test/test.tex");
         Files.createDirectories(Paths.get(workingFolder));
         Files.write(path, text.getBytes(StandardCharsets.UTF_8));
@@ -47,7 +38,7 @@ public class CompilerService {
      *
      * @param filename имя компилируемого файла
      */
-    public static CompilationResultDTO compileTexFile(String folder, String filename) {
+    public CompilationResultDTO compileTexFile(String folder, String filename) {
         StringBuilder messageBuilder = new StringBuilder();
         String line, message, path;
         try {
@@ -71,11 +62,10 @@ public class CompilerService {
             e.printStackTrace();
             throw new CompilationException(e.getMessage());
         }
-        // TODO: учесть fatal error и другие и решить траблы с кодировкой
+        // TODO: учесть fatal error и другие
         if (message.contains("! LaTeX Error:")) {
             path = "";
-        }
-        else {
+        } else {
             path = "test/" + filename.replace(".tex", ".pdf");
         }
         return new CompilationResultDTO(message, path);

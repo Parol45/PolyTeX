@@ -1,9 +1,9 @@
 package ru.test.restservice.service;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.test.restservice.dto.FileItemDTO;
+import ru.test.restservice.exceptions.FileException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class FileService {
     // Список разрешённых файловых расширений
     public final static String TEXT_FILE_REGEX = ".+\\.(bib|tex)$";
@@ -31,20 +32,13 @@ public class FileService {
         return isTextFile(name) || isPicFile(name);
     }
 
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public static class FileException extends RuntimeException {
-        public FileException(String message) {
-            super(message);
-        }
-    }
-
     /**
      * Функция, возвращающая список файлов, с которыми пользователь может работать
      *
      * @param folder рабочая директория пользователя
      * @return Список объектов с информацией о файлах
      */
-    public static ArrayList<FileItemDTO> listFiles(String folder) throws IOException {
+    public ArrayList<FileItemDTO> listFiles(String folder) throws IOException {
         ArrayList<FileItemDTO> result = new ArrayList<>();
         List<Path> files = Files.list(Paths.get(folder)).filter(
                 (path) -> isAllowedFile(path.toString())).collect(Collectors.toList());
@@ -65,7 +59,7 @@ public class FileService {
      * @param file файл с фронтенда
      * @return Объект с информацией о файле
      */
-    public static FileItemDTO saveAndReturnFile(MultipartFile file) throws IOException {
+    public FileItemDTO save(MultipartFile file) throws IOException {
         String filename, fileType;
         List<String> content;
         // Чтобы не было NullPointerException
@@ -93,5 +87,22 @@ public class FileService {
             content = Collections.singletonList(path.toString());
         }
         return new FileItemDTO(filename, fileType, content);
+    }
+
+    /**
+     * Перезапись содержимого файлов
+     *
+     * @param files полученные объекты текстовых документов с фронта
+     */
+    public void rewriteFiles(ArrayList<FileItemDTO> files) throws IOException {
+        for (FileItemDTO file : files) {
+            Path path = Paths.get("test/" + file.name);
+            Files.write(path, file.content);
+        }
+    }
+
+    public void deleteFile(String path) throws IOException {
+        Path fileToDeletePath = Paths.get("test/" + path);
+        Files.deleteIfExists(fileToDeletePath);
     }
 }

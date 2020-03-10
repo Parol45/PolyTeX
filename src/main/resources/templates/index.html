@@ -1,5 +1,7 @@
 <html xmlns:th="https://www.thymeleaf.org">
 
+<!-- TODO: inline-block заменить на flexbox -->
+
 <head>
     <meta charset="UTF-8">
     <title>Diplom</title>
@@ -14,21 +16,21 @@
 <header>
     <h1>Latex editor</h1>
     <button class="compile-butt" ng-click="sendForCompilation()">Compile</button>
-    <button class="save-butt" ng-click="saveDoc()">Save</button>
+    <button class="save-butt" ng-click="saveDocs()">Save files</button>
 </header>
 <div class="main-panel" id="file-list-wrap">
     <div>
-        <input id="upload-file" type="file" onchange="angular.element(this).scope().uploadFile(this.files[0])"
-               hidden="true">
+        <input id="upload-file" type="file" onchange="angular.element(this).scope().uploadFile(this.files[0])" hidden="true">
         <label for="upload-file" id="upload-butt">Upload file</label>
         <ul id="file-list" ng-repeat="file in files">
-            <li onclick="angular.element(this).scope().showFile(this)" id="li-{{file.name}}"><a href>{{file.name}}</a>
-            </li>
+            <button onclick="angular.element(this).scope().deleteFile(this)" id="del-{{file.name}}" class="delete-butt" >X</button>
+            <li onclick="angular.element(this).scope().showFile(this)" id="li-{{file.name}}"><a href>{{file.name}}</a></li>
         </ul>
     </div>
-</div><!--между этими тегами не должно быть ничего--><div class="main-panel" id="source-wrap" contenteditable>
+</div><!--между этими тегами не должно быть ничего--><div class="main-panel" id="source-wrap" contenteditable onblur="angular.element(this).scope().saveOpenedDocLocally()">
 
 </div><!--между этими тегами не должно быть ничего--><div class="main-panel" id="result-wrap">
+    <embed class='document' ng-src="{{pathToPdf}}"/>
 </div>
 
 </body>
