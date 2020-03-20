@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class FileService {
@@ -38,18 +38,24 @@ public class FileService {
      * @param folder рабочая директория пользователя
      * @return Список объектов с информацией о файлах
      */
-    public ArrayList<FileItemDTO> listFiles(String folder) throws IOException {
+    public List<FileItemDTO> listFiles(String folder) throws IOException {
         ArrayList<FileItemDTO> result = new ArrayList<>();
-        List<Path> files = Files.list(Paths.get(folder)).filter(
-                (path) -> isAllowedFile(path.toString())).collect(Collectors.toList());
-        for (Path file : files) {
-            String filename = file.getFileName().toString();
-            if (isTextFile(file.toString())) {
-                result.add(new FileItemDTO(filename, "txt", Files.readAllLines(file)));
-            } else {
-                result.add(new FileItemDTO(filename, "pic", Collections.singletonList(file.toString())));
-            }
-        }
+        Files
+                .list(Paths.get(folder))
+                .filter((path) -> isAllowedFile(path.toString()))
+                .forEach((file) ->
+                {
+                    String filename = file.getFileName().toString();
+                    if (isTextFile(file.toString())) {
+                        try {
+                            result.add(new FileItemDTO(filename, "txt", Files.readAllLines(file)));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        result.add(new FileItemDTO(filename, "pic", Collections.singletonList(file.toString())));
+                    }
+                });
         return result;
     }
 
@@ -91,10 +97,8 @@ public class FileService {
 
     /**
      * Перезапись содержимого файлов
-     *
-     * @param files полученные объекты текстовых документов с фронта
      */
-    public void rewriteFiles(ArrayList<FileItemDTO> files) throws IOException {
+    public void rewriteFiles(List<FileItemDTO> files) throws IOException {
         for (FileItemDTO file : files) {
             Path path = Paths.get("test/" + file.name);
             Files.write(path, file.content);
@@ -104,5 +108,20 @@ public class FileService {
     public void deleteFile(String path) throws IOException {
         Path fileToDeletePath = Paths.get("test/" + path);
         Files.deleteIfExists(fileToDeletePath);
+        if (path.endsWith(".tex")) {
+            String prefix = fileToDeletePath.getFileName().toString().replaceAll("\\.tex$", "");
+            try (Stream<Path> paths = Files.walk(fileToDeletePath.getParent())) {
+                paths
+                        .filter(f -> Files.isRegularFile(f) && f.getFileName().toString().startsWith(prefix))
+                        .forEach(f ->
+                        {
+                            try {
+                                Files.deleteIfExists(f);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+            }
+        }
     }
 }

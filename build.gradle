@@ -15,9 +15,18 @@ repositories {
 
 dependencies {
     annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
-    compile "org.springframework.boot:spring-boot-configuration-processor"
+    compile 'org.springframework.boot:spring-boot-configuration-processor'
+    compile 'org.springframework.boot:spring-boot-starter-security'
+    compile 'org.springframework.security:spring-security-cas'
+    //compile 'org.jasig.cas.client:cas-client-support-springboot:3.6.1'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compile 'org.hibernate:hibernate-core:5.4.3.Final'
+    compile 'org.hibernate:hibernate-java8:5.4.3.Final'
+    compile 'com.h2database:h2:1.4.199'
+
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }

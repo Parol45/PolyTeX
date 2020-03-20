@@ -7,7 +7,7 @@ import ru.test.restservice.dto.FileItemDTO;
 import ru.test.restservice.service.FileService;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
 
 @RestController
@@ -19,9 +19,6 @@ public class FileController {
 
     /**
      * Приём файла с фронта и проверка его расширения на допустимость
-     *
-     * @param file файл, передаваемый с post-запросом
-     * @return http код операции
      */
     @PostMapping(value = "/upload", headers = "content-type=multipart/*")
     public FileItemDTO handleFileUpload(@RequestParam("file") MultipartFile file) throws IOException {
@@ -34,17 +31,15 @@ public class FileController {
      * @return Список объектов-файлов: имя, тип и содержимое
      */
     @GetMapping("/files")
-    public ArrayList<FileItemDTO> returnFileList() throws IOException {
+    public List<FileItemDTO> returnFileList() throws IOException {
         return fileService.listFiles("test");
     }
 
     /**
      * Перезапись содержимого файлов
-     *
-     * @param files полученные объекты текстовых документов с фронта
      */
     @PutMapping("/files")
-    public void saveFiles(@RequestBody ArrayList<FileItemDTO> files) throws IOException {
+    public void saveFiles(@RequestBody List<FileItemDTO> files) throws IOException {
         fileService.rewriteFiles(files);
     }
 

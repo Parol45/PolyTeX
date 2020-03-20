@@ -3,11 +3,12 @@ angular
     .controller("ctrl", ['$scope', '$http', function ($scope, $http) {
 
         // TODO: событие с отсылкой изменений при закрытии страницы
+        // TODO: копипаст вставляется как обычный текст
         let sourceArea = document.querySelector("#source-wrap");
         // Тут храню инфу о полученных файлах при загрузке страницы
         $scope.files = [];
         // Индекс файла, содержимое которого отображается в данный момент
-        $scope.openedFileIndex = -1;
+        $scope.openedFile = null;
         $scope.pathToPdf = "";
 
         //При загрузке страницы обращение к серверу и получение списка существующих в рабочей папке файлов
@@ -15,10 +16,11 @@ angular
             (response) => {
                 // Цикл с добавлением списка файлов в список слева и отображение первого текстового
                 angular.forEach(response.data, function (value, key) {
-                    $scope.files.push({name: value.name, type: value.type, content: value.content});
-                    if ($scope.openedFileIndex === -1 && $scope.files[key].type === "txt") {
-                        $scope.openedFileIndex = key;
-                        $scope.printFile(key);
+                    let file = {name: value.name, type: value.type, content: value.content};
+                    $scope.files.push(file);
+                    if ($scope.openedFile === null && file.type === "txt") {
+                        $scope.openedFile = file;
+                        $scope.printFile(file);
                     }
                 });
             },
@@ -26,9 +28,12 @@ angular
                 $scope.showError();
             });
 
+
         // Пока что отправка текста из div на сервер для компиляции только его и получение пути к пдфнику
         $scope.sendForCompilation = function () {
-            $http.post("/api/compile/", sourceArea.innerText.replace(/\n\n/g, "\n")).then(
+            $scope.saveOpenedDocLocally();
+            let files = $scope.listTxtDocs();
+            $http.post("/api/compile/?target=" + $scope.openedFile.name, files).then(
                 (response) => {
                     if (response.data.pathToPdf !== "") {
                         document.querySelector("#result-wrap").innerHTML = "<embed class='document' src=" + response.data.pathToPdf + "/>";
@@ -75,16 +80,18 @@ angular
         $scope.showFile = function (link) {
             // id элемента списка формируется как "li-" + его имя
             let name = link.id.substr(3);
-            let key = $scope.files.find(f => f.name === name);
+            document.getElementById("li-" + $scope.openedFile.name).style.backgroundColor = null;
+            document.getElementById("li-" + name).style.backgroundColor = "#cecebb";
+            let file = $scope.files.find(f => f.name === name);
             $scope.saveOpenedDocLocally();
-            $scope.openedFileIndex = key;
-            $scope.printFile(key);
+            $scope.openedFile = file;
+            $scope.printFile(file);
         };
 
         // Заполнение области для редактирования содержимым файла из переменной
-        $scope.printFile = function (key) {
+        $scope.printFile = function (file) {
             sourceArea.innerHTML = "";
-            angular.forEach($scope.files[key].content, function (value, k) {
+            angular.forEach(file.content, function (value, k) {
                 let newLine = document.createElement('div');
                 newLine.innerHTML = value === "" ? "<br>" : value;
                 sourceArea.appendChild(newLine);
@@ -114,9 +121,10 @@ angular
 
         // При потере фокуса или переключении документов
         $scope.saveOpenedDocLocally = function () {
-            if ($scope.openedFileIndex !== -1 && $scope.files[$scope.openedFileIndex].type === "txt") {
+            if ($scope.openedFile !== null && $scope.openedFile.type === "txt") {
+                //hmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm
                 let sourceCode = sourceArea.innerText.replace(/\n\n/g, "\n");
-                $scope.files[$scope.openedFileIndex].content = sourceCode.split("\n");
+                $scope.openedFile.content = sourceCode.split("\n");
             }
         };
 
@@ -125,17 +133,12 @@ angular
             let name = link.id.substr(4);
             $http.delete("/api/files/?path=" + name).then(() => {
                 // удаляю элемент левого списка
-                let deleteIndex = $scope.files.find(f => f.name === name);
-                if (deleteIndex < $scope.openedFileIndex) {
-                    $scope.openedFileIndex--;
-                } else if (deleteIndex === $scope.openedFileIndex) {
+                let deleteIndex = $scope.files.indexOf($scope.files.find(f => f.name === name));
+                if ($scope.openedFile !== null && name === $scope.openedFile.name) {
                     sourceArea.innerHTML = "";
-                    $scope.openedFileIndex = -1;
+                    $scope.openedFile = null;
                 }
                 $scope.files.splice(deleteIndex, 1);
-                if ($scope.files.length === 0) {
-                    $scope.openedFileIndex = -1;
-                }
             }, () => {
                 $scope.showError();
             });

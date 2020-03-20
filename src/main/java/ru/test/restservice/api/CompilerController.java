@@ -1,15 +1,15 @@
 package ru.test.restservice.api;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.web.bind.annotation.*;
 import ru.test.restservice.dto.CompilationResultDTO;
+import ru.test.restservice.dto.FileItemDTO;
 import ru.test.restservice.service.CompilerService;
+import ru.test.restservice.service.FileService;
 
 import java.io.IOException;
-
+import java.util.List;
 
 
 @RestController
@@ -17,17 +17,18 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CompilerController {
 
+    private final FileService fileService;
     private final CompilerService compilerService;
 
     /**
      * Метод, обрабатывающий запросы на компиляцию с фронтенда
      *
-     * @param textInp содержимое компилируемого .tex файла
+     * @param target имя компилируемого .tex файла
      * @return JSON с ошибкой компиляции или путь к pdf
      */
     @PostMapping("/compile")
-    public CompilationResultDTO compileHandler(@RequestBody String textInp) throws IOException {
-        compilerService.createTexFile(textInp);
-        return compilerService.compileTexFile(compilerService.workingFolder, "test.tex");
+    public CompilationResultDTO compileHandler(@RequestParam String target, @RequestBody List<FileItemDTO> files) throws IOException {
+        fileService.rewriteFiles(files);
+        return compilerService.compileTexFile(compilerService.workingFolder, target);
     }
 }

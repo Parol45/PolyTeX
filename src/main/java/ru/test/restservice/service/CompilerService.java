@@ -6,12 +6,7 @@ import ru.test.restservice.exceptions.CompilationException;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static ru.test.restservice.MainApplication.isWindows;
 
@@ -20,18 +15,6 @@ public class CompilerService {
 
     // TODO: после добавления авторизации связать компиляцию с рабочей папкой и компилировать по filename
     public String workingFolder = "test";
-
-    /**
-     * Метод, создающий в папке пользователя новый .tex файл
-     * или перезаписывающий уже существующий
-     *
-     * @param text содержимое создаваемого .tex файла
-     */
-    public void createTexFile(String text) throws IOException {
-        Path path = Paths.get("test/test.tex");
-        Files.createDirectories(Paths.get(workingFolder));
-        Files.write(path, text.getBytes(StandardCharsets.UTF_8));
-    }
 
     /**
      * Метод, обращающийся к командной строке для вызова latex компилятора
