@@ -1,57 +1,80 @@
 package ru.test.restservice.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.test.restservice.dao.ProjectRepository;
 import ru.test.restservice.dto.CompilationResultDTO;
+import ru.test.restservice.dto.FileItemDTO;
+import ru.test.restservice.entity.Project;
 import ru.test.restservice.exceptions.CompilationException;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 import static ru.test.restservice.MainApplication.isWindows;
 
 @Service
+@RequiredArgsConstructor
 public class CompilerService {
 
-    // TODO: после добавления авторизации связать компиляцию с рабочей папкой и компилировать по filename
-    public String workingFolder = "test";
+    private final ProjectRepository projectRepository;
 
-    /**
-     * Метод, обращающийся к командной строке для вызова latex компилятора
-     *
-     * @param filename имя компилируемого файла
-     */
-    public CompilationResultDTO compileTexFile(String folder, String filename) {
+    public String executeTerminalCommand(String command, String pathToFile) {
         StringBuilder messageBuilder = new StringBuilder();
-        String line, message, path;
         try {
             ProcessBuilder pBuilder = new ProcessBuilder();
             if (isWindows) {
-                pBuilder.command("cmd.exe", "/c", "pdflatex --synctex=1 --interaction=nonstopmode \"" + filename + "\"");
+                pBuilder.command("cmd.exe", "/c", command);
             } else {
-                pBuilder.command("sh", "-c", "pdflatex --synctex=1 --interaction=nonstopmode \"" + filename + "\"");
+                pBuilder.command("sh", "-c", command);
             }
-            pBuilder.directory(new File(folder));
+            pBuilder.directory(new File(pathToFile));
             Process proc = pBuilder.start();
             BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            String line;
             while ((line = in.readLine()) != null) {
-                System.out.println(line);
                 messageBuilder.append(line);
             }
             proc.waitFor();
             in.close();
-            message = messageBuilder.toString();
         } catch (Exception e) {
-            e.printStackTrace();
             throw new CompilationException(e.getMessage());
         }
-        // TODO: учесть fatal error и другие
-        if (message.contains("! LaTeX Error:")) {
-            path = "";
-        } else {
-            path = "test/" + filename.replace(".tex", ".pdf");
+        return messageBuilder.toString();
+    }
+
+    /**
+     * Метод, обращающийся к командной строке для вызова latex компилятора
+     *
+     * @param file компилируемый файл
+     */
+    public CompilationResultDTO compileTexFile(FileItemDTO file, UUID projectId) throws IOException {
+        Project project = projectRepository.findById(projectId).get();
+        Files.deleteIfExists(Paths.get(project.path + file.path.replaceAll("\\.tex$", ".pdf")));
+        String latexMessage, biberMessage = "",
+                pdfLaTeX = String.format("pdflatex --synctex=1 --interaction=nonstopmode \"%s\"", file.name),
+                biber = String.format("biber.exe \"%s\"", file.name.replaceAll("\\.tex$", "")),
+                pathToFile = project.path + Paths.get(file.path).getParent();
+
+        latexMessage = executeTerminalCommand(pdfLaTeX, pathToFile);
+        Path bibliographyFile = Paths.get(project.path + file.path.replaceAll("\\.tex$", ".bcf"));
+        if (Files.exists(bibliographyFile)) {
+            biberMessage = executeTerminalCommand(biber, pathToFile);
         }
-        return new CompilationResultDTO(message, path);
+
+        // TODO: возвращать log файл на другую вкладку
+        String resultFilePath = file.path.replaceAll("\\.tex$", ".pdf");
+        if (Files.exists(Paths.get(project.path + resultFilePath))) {
+            return new CompilationResultDTO(latexMessage, biberMessage, project.path + resultFilePath);
+        } else {
+            return new CompilationResultDTO(latexMessage, biberMessage, "");
+        }
     }
 
 }

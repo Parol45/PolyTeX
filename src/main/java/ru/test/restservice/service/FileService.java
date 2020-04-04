@@ -1,24 +1,27 @@
 package ru.test.restservice.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
+import ru.test.restservice.dao.ProjectRepository;
 import ru.test.restservice.dto.FileItemDTO;
+import ru.test.restservice.entity.Project;
 import ru.test.restservice.exceptions.FileException;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class FileService {
     // Список разрешённых файловых расширений
     public final static String TEXT_FILE_REGEX = ".+\\.(bib|tex)$";
     public final static String PIC_FILE_REGEX = ".+\\.(svg|jpg|png)$";
+    public final static String AUX_FILE_REGEX = ".+\\.(aux|bbl|bcf|blg|log|out|pdf|run.xml|synctex.gz|toc)$";
 
     public static boolean isTextFile(String name) {
         return name.matches(TEXT_FILE_REGEX);
@@ -32,30 +35,39 @@ public class FileService {
         return isTextFile(name) || isPicFile(name);
     }
 
+    private final ProjectRepository projectRepository;
+
     /**
      * Функция, возвращающая список файлов, с которыми пользователь может работать
      *
-     * @param folder рабочая директория пользователя
      * @return Список объектов с информацией о файлах
      */
-    public List<FileItemDTO> listFiles(String folder) throws IOException {
+    public List<FileItemDTO> listFiles(UUID projectId) throws IOException {
         ArrayList<FileItemDTO> result = new ArrayList<>();
-        Files
-                .list(Paths.get(folder))
-                .filter((path) -> isAllowedFile(path.toString()))
-                .forEach((file) ->
-                {
-                    String filename = file.getFileName().toString();
-                    if (isTextFile(file.toString())) {
-                        try {
-                            result.add(new FileItemDTO(filename, "txt", Files.readAllLines(file)));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        result.add(new FileItemDTO(filename, "pic", Collections.singletonList(file.toString())));
+        Stack<Path> files = new Stack<>();
+        Project project = projectRepository.findById(projectId).get();
+        Files.list(Paths.get(project.path)).forEach(files::add);
+        while (!files.empty()) {
+            Path file = files.pop();
+            String filepath = file.toString().replace("\\", "/");
+            filepath = filepath.replaceAll("^" + project.path, "");
+            if (Files.isDirectory(file)) {
+                Files
+                        .list(file)
+                        .forEach(files::push);
+                result.add(new FileItemDTO(file.getFileName().toString(), "dir", filepath, new ArrayList<>()));
+            } else {
+                if (isTextFile(filepath)) {
+                    try {
+                        result.add(new FileItemDTO(file.getFileName().toString(), "txt", filepath, Files.readAllLines(file)));
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                });
+                } else if (isPicFile(filepath)) {
+                    result.add(new FileItemDTO(file.getFileName().toString(), "pic", filepath, Collections.singletonList(project.id + filepath)));
+                }
+            }
+        }
         return result;
     }
 
@@ -65,8 +77,9 @@ public class FileService {
      * @param file файл с фронтенда
      * @return Объект с информацией о файле
      */
-    public FileItemDTO save(MultipartFile file) throws IOException {
+    public FileItemDTO save(MultipartFile file, String relativePath, UUID projectId) throws IOException {
         String filename, fileType;
+        Project project = projectRepository.findById(projectId).get();
         List<String> content;
         // Чтобы не было NullPointerException
         if (file.getOriginalFilename() != null) {
@@ -75,13 +88,12 @@ public class FileService {
         } else {
             throw new FileException("Wtf have u passed as file?");
         }
-        Path path = Paths.get("test/" + file.getOriginalFilename());
+        Path path = Paths.get(project.path + relativePath);
         // Проверяю и на фронте, и на бэке разрешён ли файл (на фронте пользователь может удалить метод)
         if (isAllowedFile(filename)) {
             if (!Files.exists(path)) {
                 Files.createFile(path);
             }
-            // Пока что перезаписываю файл, если он уже существует, позже буду возвращать еррор код
             Files.write(path, file.getBytes());
         } else {
             throw new FileException("Wrong file type");
@@ -90,38 +102,47 @@ public class FileService {
         if (fileType.equals("txt")) {
             content = Files.readAllLines(path);
         } else {
-            content = Collections.singletonList(path.toString());
+            content = Collections.singletonList(path.toString().replace("\\", "/"));
         }
-        return new FileItemDTO(filename, fileType, content);
+        return new FileItemDTO(filename, fileType, path.toString().replace("\\", "/"), content);
     }
 
     /**
      * Перезапись содержимого файлов
      */
-    public void rewriteFiles(List<FileItemDTO> files) throws IOException {
+    public void rewriteFiles(List<FileItemDTO> files, UUID projectId) throws IOException {
+        Project project = projectRepository.findById(projectId).get();
         for (FileItemDTO file : files) {
-            Path path = Paths.get("test/" + file.name);
-            Files.write(path, file.content);
-        }
-    }
-
-    public void deleteFile(String path) throws IOException {
-        Path fileToDeletePath = Paths.get("test/" + path);
-        Files.deleteIfExists(fileToDeletePath);
-        if (path.endsWith(".tex")) {
-            String prefix = fileToDeletePath.getFileName().toString().replaceAll("\\.tex$", "");
-            try (Stream<Path> paths = Files.walk(fileToDeletePath.getParent())) {
-                paths
-                        .filter(f -> Files.isRegularFile(f) && f.getFileName().toString().startsWith(prefix))
-                        .forEach(f ->
-                        {
-                            try {
-                                Files.deleteIfExists(f);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        });
+            Path path = Paths.get(project.path + file.path);
+            if (file.type.equals("dir")) {
+                Files.createDirectory(path);
+            } else {
+                Files.write(path, file.content);
             }
         }
     }
+
+    public void deleteFile(String path, UUID projectId) throws IOException {
+        Project project = projectRepository.findById(projectId).get();
+        Path fileToDeletePath = Paths.get(project.path + path);
+        if (Files.isDirectory(fileToDeletePath)) {
+            // TODO: не могу фиксануть, что не удаляет папки до окончания работы приложения
+            FileSystemUtils.deleteRecursively(fileToDeletePath);
+        } else {
+            Files.deleteIfExists(fileToDeletePath);
+        }
+        if (path.endsWith(".tex")) {
+            String pureFileName = fileToDeletePath.getFileName().toString().replaceAll("\\.tex$", "");
+            Files.list(fileToDeletePath.getParent()).forEach(f -> {
+                try {
+                    if (Files.isRegularFile(f) && f.getFileName().toString().matches(pureFileName + AUX_FILE_REGEX)) {
+                        Files.deleteIfExists(f);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
 }

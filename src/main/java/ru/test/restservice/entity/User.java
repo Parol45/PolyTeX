@@ -4,21 +4,30 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.util.UUID;
 
 @Data
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    final private Long id = null;
+    @GeneratedValue
+    final private UUID user_id = null;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    public String email;
 
-    private String password;
+    public String password;
+
+    @Override
+    public String toString() {
+        return email;
+    }
 
 }

@@ -17,8 +17,9 @@ dependencies {
     annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     compile 'org.springframework.boot:spring-boot-configuration-processor'
     compile 'org.springframework.boot:spring-boot-starter-security'
-    compile 'org.springframework.security:spring-security-cas'
+    //compile 'org.springframework.security:spring-security-cas'
     //compile 'org.jasig.cas.client:cas-client-support-springboot:3.6.1'
+    compile "org.springframework:spring-core"
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 

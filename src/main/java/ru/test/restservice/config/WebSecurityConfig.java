@@ -1,4 +1,4 @@
-package ru.test.restservice;
+package ru.test.restservice.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,21 +9,20 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.test.restservice.service.MyUserDetailsService;
+import ru.test.restservice.service.ClientDetailsService;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final MyUserDetailsService myUserDetailsService;
+    private final ClientDetailsService userDetailsService;
 
-    //develop this shit
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
-                .withUser("test").password(passwordEncoder().encode("test")).roles("USER");
-        auth.userDetailsService(myUserDetailsService).passwordEncoder(passwordEncoder());
+                .withUser("test").password(passwordEncoder().encode("test")).roles("ADMIN");
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
     @Bean
@@ -35,22 +34,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/","/api/**").hasAnyRole("USER", "ADMIN")
+                // TODO: админка
+                //.antMatchers("/h2-console", "/admin/**").hasAnyRole("ADMIN")
+                //.and()
+                //.authorizeRequests()
+                .antMatchers("/", "/api/**", "/projects/**").hasAnyRole("USER", "ADMIN")
                 .and()
                 .authorizeRequests()
                 .antMatchers("/registration").permitAll()
-                .anyRequest().authenticated();
-        http
+                .anyRequest().authenticated()
+                .and()
                 .formLogin()
                 .loginPage("/login")
                 .permitAll()
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/projects", true)
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .and()
                 .logout()
                 .logoutSuccessUrl("/login")
-                .deleteCookies("JSESSIONID")
                 .permitAll();
 
         http.headers().frameOptions().disable();

@@ -20,20 +20,21 @@ class SecurityController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login.html";
+        return "login";
     }
 
     @GetMapping("/registration")
     public String registerPage() {
-        return "registration.html";
+        return "registration";
     }
 
-    @PostMapping("/registration")
     @Transactional
+    @PostMapping("/registration")
     public RedirectView register(@RequestParam("email") String email,
                                  @RequestParam("password") String password) {
-        userRepository.save(new User(email, new BCryptPasswordEncoder(4).encode(password)));
-        return new RedirectView("/login");
+        User newUser = new User(email, new BCryptPasswordEncoder(4).encode(password));
+        userRepository.save(newUser);
+        return new RedirectView("/projects");
     }
 
 }

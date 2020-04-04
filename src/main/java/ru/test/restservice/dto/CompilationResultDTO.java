@@ -9,6 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class CompilationResultDTO {
-    public String compilerMessage;
+    public String latexMessage;
+    public String biberMessage;
     public String pathToPdf;
 }

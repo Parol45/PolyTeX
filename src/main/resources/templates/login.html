@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <link rel="shortcut icon" type="image/png" href="../static/favicon.png" th:href="@{/favicon.png}">
+    <link rel="icon" type="image/png" href="../static/favicon.png" th:href="@{/favicon.png}">
     <title>Login</title>
 </head>
 <body>
-<form id="login-form" class="mobile" method="post" action="/login">
+<form id="login-form" method="post" action="/login">
     <input type="text" autocomplete="email" name="email" placeholder="Почта" required>
     <br>
     <input type="password" autocomplete="password" name="password" placeholder="Пароль" required>
