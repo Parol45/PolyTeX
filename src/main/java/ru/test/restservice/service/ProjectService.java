@@ -22,6 +22,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ru.test.restservice.utils.FileUtils.isAuxFile;
+
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,6 @@ public class ProjectService {
 
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
-    private final FileService fileService;
     private final GitService gitService;
 
     public List<ProjectDTO> listProjects(String username) {
@@ -115,7 +116,7 @@ public class ProjectService {
             paths
                     .filter(path -> Files.isRegularFile(path))
                     .forEach(file -> {
-                        if (fileService.isAuxFile(file.toString())) {
+                        if (isAuxFile(file.toString())) {
                             try {
                                 Files.delete(file);
                             } catch (IOException e) {

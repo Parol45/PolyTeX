@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.test.restservice.dto.FileItemDTO;
 import ru.test.restservice.service.FileService;
+import ru.test.restservice.service.GitService;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class FileApiController {
 
     private final FileService fileService;
+    private final GitService gitService;
 
     /**
      * Приём файла с фронта и проверка его расширения на допустимость
@@ -38,7 +40,7 @@ public class FileApiController {
 
     @PostMapping("/projects/{projectId}/commit-files")
     public List<String> returnCommitFileList(@PathVariable UUID projectId, @RequestBody List<String> fileIds) throws IOException {
-        return fileService.listCommitFiles(projectId, fileIds);
+        return gitService.getCommitFilesList(projectId, fileIds);
     }
 
     /**

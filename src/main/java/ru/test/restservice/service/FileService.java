@@ -1,10 +1,6 @@
 package ru.test.restservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectLoader;
-import org.eclipse.jgit.lib.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,9 +10,7 @@ import ru.test.restservice.entity.Project;
 import ru.test.restservice.exceptions.FileException;
 import ru.test.restservice.exceptions.NotFoundException;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,29 +20,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static ru.test.restservice.utils.FileUtils.*;
+
 @Service
 @RequiredArgsConstructor
 public class FileService {
-    // Список разрешённых файловых расширений
-    public final static String TEXT_FILE_REGEX = ".+\\.(bib|tex)$";
-    public final static String PIC_FILE_REGEX = ".+\\.(svg|jpg|png)$";
-    public final static String AUX_FILE_REGEX = ".+\\.(aux|bbl|bcf|blg|log|out|pdf|run.xml|synctex.gz|toc)$";
-
-    public boolean isTextFile(String name) {
-        return name.matches(TEXT_FILE_REGEX);
-    }
-
-    public boolean isPicFile(String name) {
-        return name.matches(PIC_FILE_REGEX);
-    }
-
-    public boolean isAllowedFile(String name) {
-        return isTextFile(name) || isPicFile(name);
-    }
-
-    public boolean isAuxFile(String name) {
-        return name.matches(AUX_FILE_REGEX);
-    }
 
     private final ProjectRepository projectRepository;
 
@@ -81,30 +57,6 @@ public class FileService {
                             }
                         }
                     });
-        }
-        return result;
-    }
-
-    public List<String> listCommitFiles(UUID projectId, List<String> fileIds) throws IOException {
-        Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
-        // TODO: создавать репозиторий напрямую
-        Git git = Git.open(new File(project.path + "/.git"));
-        Repository repository = git.getRepository();
-        StringBuilder textBuilder;
-        List<String> result = new ArrayList<>();
-        for (String fileId : fileIds) {
-            ObjectId objectId = ObjectId.fromString(fileId);
-            ObjectLoader loader = repository.open(objectId);
-            InputStream in = loader.openStream();
-            textBuilder = new StringBuilder();
-            try (Reader reader = new BufferedReader(new InputStreamReader
-                    (in, Charset.forName(StandardCharsets.UTF_8.name())))) {
-                int c;
-                while ((c = reader.read()) != -1) {
-                    textBuilder.append((char) c);
-                }
-            }
-            result.add(textBuilder.toString());
         }
         return result;
     }
