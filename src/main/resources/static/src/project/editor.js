@@ -2,13 +2,13 @@ angular
     .module("app", [])
     .controller("ctrl", ['$scope', '$http', function ($scope, $http) {
 
-        // TODO: событие с отсылкой изменений при закрытии страницы
         // TODO: копипаст вставляется как обычный текст
         let sourceArea = document.querySelector("#source-wrap");
         let resultArea = document.querySelector("#result-wrap");
         let newFileName = document.querySelector("#new-file");
         let newFolderName = document.querySelector("#new-folder");
         let fileList = document.querySelector("#file-list-wrap");
+
         // Тут храню инфу о полученных файлах при загрузке страницы
         $scope.files = [];
         // Файл, содержимое которого отображается в данный момент
@@ -28,7 +28,6 @@ angular
         //При загрузке страницы обращение к серверу и получение списка существующих в рабочей папке файлов
         $http.get("/api/projects/" + projectId + "/files/").then(
             (response) => {
-                console.log(response.data);
                 $scope.organizeFiles(response.data);
             }, () => {
                 $scope.showError();
@@ -54,9 +53,8 @@ angular
                 $scope.files.push(file);
             });
             $scope.files.sort((f1, f2) => f1.type.localeCompare(f2.type));
-            // Добавление только файлов из корневого каталога проекта
+            // Добавление в список слева только файлов из корневого каталога проекта
             fileList.appendChild($scope.makeFileList($scope.files.filter(f => f.parent === "")));
-            console.log($scope.files);
         };
 
         // Функция отправляющая внесённые изменения на сервер и запускающая компиляцию выбранного документа
@@ -228,15 +226,6 @@ angular
             }
         };
 
-        // Формирую список dto текстовых файлов и отправляю на сервер
-        $scope.saveDocs = function () {
-            $http.put("/api/projects/" + projectId + "/files/", $scope.files.filter(f => f.type === "txt")).then(() => {
-                alert("Saved!");
-            }, () => {
-                $scope.showError();
-            });
-        };
-
         // При потере фокуса или переключении документов
         $scope.saveOpenedDocLocally = function () {
             if ($scope.openedFile !== null && $scope.openedFile.type === "txt") {
@@ -244,6 +233,17 @@ angular
                 let sourceCode = sourceArea.innerText.replace(/\n\n/g, "\n");
                 $scope.openedFile.content = sourceCode.split("\n");
             }
+        };
+
+        // Формирую список dto текстовых файлов и отправляю на сервер
+        $scope.saveDocs = function () {
+            filesChanged = false;
+            $scope.saveOpenedDocLocally();
+            $http.put("/api/projects/" + projectId + "/files/", $scope.files.filter(f => f.type === "txt")).then(() => {
+                // TODO: уведомление о сохранении файлов
+            }, () => {
+                $scope.showError();
+            });
         };
 
         // Обработка нажатия на крестик у файла в списке
@@ -324,12 +324,26 @@ angular
         };
 
         $scope.clearAux = function() {
-            // TODO: написать
+            $http.get("/api/projects/" + projectId + "/clear-aux").then(() => {
+                alert("Aux files are deleted");
+            }, () => {
+                $scope.showError();
+            });
         };
 
         $scope.showError = function (message = "Something went wrong") {
-            // TODO: поменять на что-нибудь вразумительное
             alert(message);
         };
 
+
+        // Не работает минимум в яндекс браузере (и насрать в принципе)
+        window.addEventListener('beforeunload', function (e) {
+            if (filesChanged) {
+                $scope.saveDocs();
+
+                e.preventDefault();
+                e.returnValue = "";
+                return "";
+            }
+        }, false);
     }]);

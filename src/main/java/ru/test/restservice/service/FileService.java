@@ -46,6 +46,10 @@ public class FileService {
         return isTextFile(name) || isPicFile(name);
     }
 
+    public boolean isAuxFile(String name) {
+        return name.matches(AUX_FILE_REGEX);
+    }
+
     private final ProjectRepository projectRepository;
 
     /**
@@ -95,7 +99,7 @@ public class FileService {
             textBuilder = new StringBuilder();
             try (Reader reader = new BufferedReader(new InputStreamReader
                     (in, Charset.forName(StandardCharsets.UTF_8.name())))) {
-                int c = 0;
+                int c;
                 while ((c = reader.read()) != -1) {
                     textBuilder.append((char) c);
                 }
@@ -177,5 +181,6 @@ public class FileService {
             });
         }
     }
+
 
 }

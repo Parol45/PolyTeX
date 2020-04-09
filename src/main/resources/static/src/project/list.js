@@ -56,7 +56,6 @@ angular
         };
 
         $scope.showError = function (message = "Something went wrong") {
-            // TODO: поменять на что-нибудь вразумительное
             alert(message);
         };
     }]);

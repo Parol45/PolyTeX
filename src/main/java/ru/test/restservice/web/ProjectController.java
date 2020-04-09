@@ -46,7 +46,7 @@ public class ProjectController {
     public ModelAndView showChangeHistory(@PathVariable UUID projectId, Authentication auth) throws IOException, GitAPIException {
         ModelAndView hist = new ModelAndView("project/history");
         hist.addObject("projectId", projectId);
-        hist.addObject("commits", projectService.commits(projectId, auth.getName()));
+        hist.addObject("commits", projectService.listCommits(projectId, auth.getName()));
         hist.addObject("files", fileService.listFiles(projectId)
                 .stream()
                 .filter(f -> f.type.equals("txt"))

@@ -9,7 +9,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
     <script src="../../static/src/project/editor.js" th:src="@{/src/project/editor.js}"></script>
     <script th:inline="javascript">/*<![CDATA[*/
-    var projectId = /*[[${projectId}]]*/ 'default'; /*]]>*/ </script>
+    var projectId = /*[[${projectId}]]*/ 'default'; /*]]>*/
+    var filesChanged = false;
+    </script>
 </head>
 
 <body ng-app="app" ng-controller="ctrl">
@@ -41,7 +43,8 @@
     </div>
 
     <div class="main-panel" id="source-wrap" contenteditable
-         onblur="angular.element(this).scope().saveOpenedDocLocally()">
+         onblur="angular.element(this).scope().saveOpenedDocLocally()"
+         onkeydown="filesChanged = true">
     </div>
 
     <div class="main-panel" id="result-wrap">
