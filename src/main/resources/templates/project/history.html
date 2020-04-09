@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../static/src/project/history.css" th:href="@{/src/project/history.css}">
+    <link rel="shortcut icon" type="image/png" href="../../static/favicon.png" th:href="@{/favicon.png}">
+    <link rel="icon" type="image/png" href="../../static/favicon.png" th:href="@{/favicon.png}">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+    <script src="../../static/src/project/history.js" th:src="@{/src/project/history.js}"></script>
+    <script th:inline="javascript">/*<![CDATA[*/
+    var projectId = /*[[${projectId}]]*/ 'default', commits = /*[[${commits}]]*/ 'default',
+        curFiles = /*[[${files}]]*/ 'default'; /*]]>*/ </script>
+    <title>Project melody</title>
+</head>
+<body ng-app="app" ng-controller="ctrl">
+<header>
+    <div class="page-name">
+        <h1>&nbsp;Current version</h1>
+        <a th:href="@{'/projects/' + ${projectId}}">to the project</a>
+    </div>
+
+    <div class="main-panel" id="current-file-select">
+        <span class="before"></span>
+        <span class="inner">
+        <select onchange="angular.element(this).scope().showCurrentFile(value)">
+            <option value="" disabled selected>Select file</option>
+            <th:block th:each="file : ${files}">
+                <option th:value="${file.path}" th:text="${file.path}">Файл</option>
+            </th:block>
+        </select>
+        </span>
+    </div>
+
+    <div class="page-name">
+        <h1>&nbsp;Commit version</h1>
+    </div>
+
+    <div class="main-panel" id="commit-file-select">
+        <span class="before"></span>
+        <span class="inner">
+        <select onchange="angular.element(this).scope().showCommitFile(value)">
+            <option id="commit-null" value="" disabled selected>Select file</option>
+            <option ng-repeat="file in commitFiles">{{file.name}}</option>
+        </select>
+        </span>
+    </div>
+
+    <div id="commit-select">
+        <h2>Select commit:</h2>
+    </div>
+</header>
+
+<div class="flex-container">
+    <div class="main-panel" id="current-doc">
+
+    </div>
+
+    <div class="main-panel" id="commit-doc" th:text="${commits}">
+
+    </div>
+
+    <div class="main-panel" id="commit-list">
+        <ul>
+            <th:block th:each="commit : ${commits}">
+                <li>
+                    <a th:text="${commit.commitTime}" th:id="${commit.commitId}" href
+                       onclick="angular.element(this).scope().loadCommitFiles(this)">Commit</a>
+                </li>
+            </th:block>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

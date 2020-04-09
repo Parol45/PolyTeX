@@ -36,6 +36,11 @@ public class FileApiController {
         return fileService.listFiles(projectId);
     }
 
+    @PostMapping("/projects/{projectId}/commit-files")
+    public List<String> returnCommitFileList(@PathVariable UUID projectId, @RequestBody List<String> fileIds) throws IOException {
+        return fileService.listCommitFiles(projectId, fileIds);
+    }
+
     /**
      * Перезапись содержимого файлов
      */

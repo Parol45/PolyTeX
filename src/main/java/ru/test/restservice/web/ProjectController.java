@@ -1,24 +1,26 @@
 package ru.test.restservice.web;
 
 import lombok.RequiredArgsConstructor;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+import ru.test.restservice.service.FileService;
 import ru.test.restservice.service.ProjectService;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final FileService fileService;
 
     @GetMapping(value = {"", "/"})
     public RedirectView redir() {
@@ -27,39 +29,29 @@ public class ProjectController {
 
     @GetMapping(value = "/projects")
     public ModelAndView listProjects(Authentication auth) {
-        return projectService.listProjects(auth);
-    }
-
-    @PostMapping("/projects")
-    public RedirectView createNewProject(@RequestParam String projectName, Authentication auth) throws IOException {
-        projectService.createNewProject(projectName, auth);
-        return new RedirectView("/projects");
-    }
-
-    @GetMapping("/delete-project")
-    public RedirectView deleteProject(@RequestParam UUID projectId) throws IOException {
-        projectService.deleteProject(projectId);
-        return new RedirectView("/projects");
+        ModelAndView projs = new ModelAndView("project/list");
+        projs.addObject("projects", projectService.listProjects(auth.getName()));
+        return projs;
     }
 
     @GetMapping("/projects/{projectId}")
     public ModelAndView openProject(@PathVariable UUID projectId, Authentication auth) {
         projectService.checkOwnership(projectId, auth.getName());
-        ModelAndView main = new ModelAndView("index");
+        ModelAndView main = new ModelAndView("project/editor");
         main.addObject("projectId", projectId);
         return main;
     }
 
-    @PostMapping("/projects/{projectId}/add-owner")
-    public RedirectView addOwner(@PathVariable UUID projectId, @RequestParam String email) {
-        projectService.addOwner(projectId, email);
-        return new RedirectView("/projects");
-    }
-
-    @PostMapping("/projects/{projectId}/remove-owner")
-    public RedirectView removeOwner(@PathVariable UUID projectId, @RequestParam String email) {
-        projectService.removeOwner(projectId, email);
-        return new RedirectView("/projects");
+    @GetMapping("/projects/{projectId}/history")
+    public ModelAndView showChangeHistory(@PathVariable UUID projectId, Authentication auth) throws IOException, GitAPIException {
+        ModelAndView hist = new ModelAndView("project/history");
+        hist.addObject("projectId", projectId);
+        hist.addObject("commits", projectService.commits(projectId, auth.getName()));
+        hist.addObject("files", fileService.listFiles(projectId)
+                .stream()
+                .filter(f -> f.type.equals("txt"))
+                .collect(Collectors.toList()));
+        return hist;
     }
 
 }

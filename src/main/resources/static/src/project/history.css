@@ -1,0 +1,68 @@
+html, body, .document, .main-panel, .before {
+    height: 100%;
+}
+
+img, header, .document {
+    width: 100%;
+}
+
+.main-panel, img, html, body {
+    padding: 0;
+    margin: 0;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    height: 7%;
+    background-color: #37B34A;
+}
+
+header .main-panel {
+    text-align: right;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    height: 93%;
+}
+
+.flex-container .main-panel {
+    background-color: whitesmoke;
+}
+
+.main-panel {
+    overflow: auto;
+    border-right: 1px solid black;
+}
+
+span {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+select {
+    width: 150px;
+}
+
+#current-doc, #commit-doc {
+    width: 41%;
+}
+
+#commit-list, #commit-select {
+    width: 18%;
+}
+
+.page-name {
+    width: 20%;
+}
+
+#current-file-select, #commit-file-select {
+    width: 21%;
+}
+
+#commit-select {
+    border-right: 1px solid black;
+    text-align: center;
+}

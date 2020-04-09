@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 import ru.test.restservice.dao.UserRepository;
 import ru.test.restservice.entity.User;
@@ -35,6 +36,13 @@ class SecurityController {
         User newUser = new User(email, new BCryptPasswordEncoder(4).encode(password));
         userRepository.save(newUser);
         return new RedirectView("/projects");
+    }
+
+    @GetMapping("/cred-error")
+    public ModelAndView badCredPage() {
+        ModelAndView login = new ModelAndView("login");
+        login.addObject("error", "Wrong credentials");
+        return login;
     }
 
 }

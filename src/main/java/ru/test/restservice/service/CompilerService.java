@@ -7,6 +7,7 @@ import ru.test.restservice.dto.CompilationResultDTO;
 import ru.test.restservice.dto.FileItemDTO;
 import ru.test.restservice.entity.Project;
 import ru.test.restservice.exceptions.CompilationException;
+import ru.test.restservice.exceptions.NotFoundException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,7 +56,7 @@ public class CompilerService {
      * @param file компилируемый файл
      */
     public CompilationResultDTO compileTexFile(FileItemDTO file, UUID projectId) throws IOException {
-        Project project = projectRepository.findById(projectId).get();
+        Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         Files.deleteIfExists(Paths.get(project.path + file.path.replaceAll("\\.tex$", ".pdf")));
         String latexMessage, biberMessage = "",
                 pdfLaTeX = String.format("pdflatex --synctex=1 --interaction=nonstopmode \"%s\"", file.name),

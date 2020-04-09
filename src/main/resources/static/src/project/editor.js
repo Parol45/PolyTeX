@@ -28,6 +28,7 @@ angular
         //При загрузке страницы обращение к серверу и получение списка существующих в рабочей папке файлов
         $http.get("/api/projects/" + projectId + "/files/").then(
             (response) => {
+                console.log(response.data);
                 $scope.organizeFiles(response.data);
             }, () => {
                 $scope.showError();
@@ -37,10 +38,11 @@ angular
         $scope.organizeFiles = function (files) {
             angular.forEach(files, function (value) {
                 let parent;
-                if (value.name === value.path) {
+                let reg = value.path.match(/^(.*)\/[^\/]+$/);
+                if (reg === null) {
                     parent = "";
                 } else {
-                    parent = value.path.match(/^(.*)\/[^\/]+$/)[1];
+                    parent = reg[1];
                 }
                 let file = {
                     name: value.name,
@@ -54,6 +56,7 @@ angular
             $scope.files.sort((f1, f2) => f1.type.localeCompare(f2.type));
             // Добавление только файлов из корневого каталога проекта
             fileList.appendChild($scope.makeFileList($scope.files.filter(f => f.parent === "")));
+            console.log($scope.files);
         };
 
         // Функция отправляющая внесённые изменения на сервер и запускающая компиляцию выбранного документа
@@ -63,7 +66,7 @@ angular
                 $http.post("/api/projects/" + projectId + "/compile/?targetFilepath=" + $scope.openedFile.path, $scope.files.filter(f => f.type === "txt")).then(
                     (response) => {
                         if (response.data.pathToPdf !== "") {
-                            resultArea.innerHTML = `<embed class='document' src='${response.data.pathToPdf.replace(/^projects\//, "")}'/>`;
+                            resultArea.innerHTML = `<embed class='document' src='/${response.data.pathToPdf}'/>`;
                             // TODO: добавить вторую вкладку и заменить на:
                             // $scope.pathToPdf = response.data.pathToPdf;
                             console.log(response.data.latexMessage + "\n" + response.data.biberMessage);
@@ -219,7 +222,7 @@ angular
                 sourceArea.contentEditable = true;
             } else if (file.type === "pic") {
                 sourceArea.contentEditable = false;
-                sourceArea.innerHTML = `<div><img src='${file.content[0]}' alt='${file.content[0]}'></div>`;
+                sourceArea.innerHTML = `<div><img src='/${file.content[0]}' alt='${file.content[0]}'></div>`;
             } else {
                 console.log("Wtf? Item type is: " + file.type)
             }
@@ -320,9 +323,13 @@ angular
             }
         };
 
+        $scope.clearAux = function() {
+            // TODO: написать
+        };
+
         $scope.showError = function (message = "Something went wrong") {
             // TODO: поменять на что-нибудь вразумительное
             alert(message);
-        }
+        };
 
     }]);

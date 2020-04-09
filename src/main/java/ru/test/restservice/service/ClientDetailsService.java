@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.test.restservice.dao.UserRepository;
 
@@ -17,7 +18,8 @@ public class ClientDetailsService implements UserDetailsService {
 
     @Override
     public User loadUserByUsername(String email) {
-        ru.test.restservice.entity.User user = userRepository.findByEmail(email);
+        ru.test.restservice.entity.User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("email: " + email));
         return new User(user.email, user.password, Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
     }
 

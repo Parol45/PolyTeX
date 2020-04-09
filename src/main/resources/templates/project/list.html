@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- TODO: убрать пользователя из "убрать владельца" -->
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="shortcut icon" type="image/png" href="../../static/favicon.png" th:href="@{/favicon.png}">
+    <link rel="icon" type="image/png" href="../../static/favicon.png" th:href="@{/favicon.png}">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+    <script src="../../static/src/project/list.js" th:src="@{/src/project/list.js}"></script>
+    <script th:inline="javascript">/*<![CDATA[*/
+    var projects = /*[[${projects}]]*/ 'default' </script>
+    <title>Your projects</title>
+</head>
+<body ng-app="app" ng-controller="ctrl">
+
+<input type="text" id="projectName" placeholder="Имя проекта">
+<input type="submit" value="Создать" ng-click="createNewProject()">
+
+<form id="logout-form" method="post" action="/logout">
+    <button type="submit">Logout</button>
+</form>
+
+<br>
+
+<table border="1">
+    <tr>
+        <td>id</td>
+        <td>Имя</td>
+        <td>Владельцы</td>
+        <td>Добавить владельца</td>
+        <td>Убрать владельца</td>
+        <td>Удалить проект</td>
+    </tr>
+    <tr ng-attr-id="project.id" ng-repeat="project in projects">
+        <td>{{project.id}}</td>
+        <td><a ng-attr-href="{{'/projects/' + project.id}}">{{project.name}}</a></td>
+        <td>{{project.owners}}</td>
+        <td>
+            <input type="text" ng-attr-id="{{'add-' + project.id}}" placeholder="email">
+            <button type="submit" ng-click="addOwner(project.id)">Add</button>
+        </td>
+        <td>
+            <select ng-attr-id="{{'del-' + project.id}}">
+                <option ng-repeat="email in project.owners">{{email}}</option>
+            </select>
+            <button type="submit" ng-click="deleteOwner(project.id)">Remove</button>
+        </td>
+        <td><a ng-click="deleteProject(project.id)" href>Удалить</a></td>
+    </tr>
+</table>
+
+</body>
+</html>
