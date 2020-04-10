@@ -4,23 +4,26 @@ angular
         $scope.commitFiles = [];
         $scope.selectedLink = null;
 
+        // TODO: прикрутить библиотеку diffs
+
         let currentFileArea = document.querySelector("#current-doc");
         let commitFileArea = document.querySelector("#commit-doc");
 
 
         $scope.showCurrentFile = function (filepath) {
             currentFileArea.innerHTML = "";
+            let text = "";
             angular.forEach(curFiles.find(f => f.path === filepath).content, line => {
-                let newLine = document.createElement('div');
-                newLine.innerHTML = line === "" ? "<br>" : line;
-                currentFileArea.appendChild(newLine);
+                text += line + "\n";
             });
+            currentFileArea.innerText = text;
+            return text;
         };
 
         $scope.showCommitFile = function (filepath) {
-            let file = $scope.commitFiles.find(f => f.name = filepath);
+            let file = $scope.commitFiles.find(f => f.name === filepath);
             commitFileArea.innerText = file.content;
-
+            return file.content;
         };
 
         $scope.loadCommitFiles = function (link) {
@@ -46,9 +49,7 @@ angular
             });
         };
 
-
         $scope.showError = function (message = "Something went wrong") {
-            // TODO: поменять на что-нибудь вразумительное
             alert(message);
         };
 

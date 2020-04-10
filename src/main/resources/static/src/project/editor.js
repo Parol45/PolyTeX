@@ -2,13 +2,13 @@ angular
     .module("app", [])
     .controller("ctrl", ['$scope', '$http', function ($scope, $http) {
 
-        // TODO: событие с отсылкой изменений при закрытии страницы
         // TODO: копипаст вставляется как обычный текст
         let sourceArea = document.querySelector("#source-wrap");
         let resultArea = document.querySelector("#result-wrap");
         let newFileName = document.querySelector("#new-file");
         let newFolderName = document.querySelector("#new-folder");
         let fileList = document.querySelector("#file-list-wrap");
+
         // Тут храню инфу о полученных файлах при загрузке страницы
         $scope.files = [];
         // Файл, содержимое которого отображается в данный момент
@@ -26,9 +26,8 @@ angular
         $scope.closeCurrentFile();
 
         //При загрузке страницы обращение к серверу и получение списка существующих в рабочей папке файлов
-        $http.get("/api/projects/" + projectId + "/files/").then(
+        $http.get(`/api/projects/${projectId}/files/`).then(
             (response) => {
-                console.log(response.data);
                 $scope.organizeFiles(response.data);
             }, () => {
                 $scope.showError();
@@ -54,16 +53,15 @@ angular
                 $scope.files.push(file);
             });
             $scope.files.sort((f1, f2) => f1.type.localeCompare(f2.type));
-            // Добавление только файлов из корневого каталога проекта
+            // Добавление в список слева только файлов из корневого каталога проекта
             fileList.appendChild($scope.makeFileList($scope.files.filter(f => f.parent === "")));
-            console.log($scope.files);
         };
 
         // Функция отправляющая внесённые изменения на сервер и запускающая компиляцию выбранного документа
         $scope.sendForCompilation = function () {
             $scope.saveOpenedDocLocally();
             if ($scope.openedFile !== null) {
-                $http.post("/api/projects/" + projectId + "/compile/?targetFilepath=" + $scope.openedFile.path, $scope.files.filter(f => f.type === "txt")).then(
+                $http.post(`/api/projects/${projectId}/compile/?targetFilepath=${$scope.openedFile.path}`, $scope.files.filter(f => f.type === "txt")).then(
                     (response) => {
                         if (response.data.pathToPdf !== "") {
                             resultArea.innerHTML = `<embed class='document' src='/${response.data.pathToPdf}'/>`;
@@ -99,7 +97,7 @@ angular
                 let fd = new FormData();
                 fd.append("file", file);
                 fd.append("path", path);
-                $http.post("/api/projects/" + projectId + "/upload/", fd, {
+                $http.post(`/api/projects/${projectId}/upload/`, fd, {
                     transformRequest: angular.identity,
                     headers: {"Content-Type": undefined}
                 }).then((response) => {
@@ -228,15 +226,6 @@ angular
             }
         };
 
-        // Формирую список dto текстовых файлов и отправляю на сервер
-        $scope.saveDocs = function () {
-            $http.put("/api/projects/" + projectId + "/files/", $scope.files.filter(f => f.type === "txt")).then(() => {
-                alert("Saved!");
-            }, () => {
-                $scope.showError();
-            });
-        };
-
         // При потере фокуса или переключении документов
         $scope.saveOpenedDocLocally = function () {
             if ($scope.openedFile !== null && $scope.openedFile.type === "txt") {
@@ -246,11 +235,22 @@ angular
             }
         };
 
+        // Формирую список dto текстовых файлов и отправляю на сервер
+        $scope.saveDocs = function () {
+            filesChanged = false;
+            $scope.saveOpenedDocLocally();
+            $http.put(`/api/projects/${projectId}/files/`, $scope.files.filter(f => f.type === "txt")).then(() => {
+                // TODO: уведомление о сохранении файлов
+            }, () => {
+                $scope.showError();
+            });
+        };
+
         // Обработка нажатия на крестик у файла в списке
         $scope.deleteFile = function (link) {
             if (window.confirm("Are you sure?")) {
                 let path = link.id.substr(4);
-                $http.delete("/api/projects/" + projectId + "/files/?path=" + path).then(() => {
+                $http.delete(`/api/projects/${projectId}/files/?path=${path}`).then(() => {
                     // Если удаляемый элемент - папка, то удаляю вложенные элементы
                     let files = $scope.files.filter(f => f.path === path || f.parent === path);
                     for (let i = 0; i < files.length;) {
@@ -309,7 +309,7 @@ angular
                         content: [],
                         parent: parent
                     };
-                    $http.put("/api/projects/" + projectId + "/files", [newItem]).then(() => {
+                    $http.put(`/api/projects/${projectId}/files`, [newItem]).then(() => {
                         $scope.files.push(newItem);
                         let newFile = $scope.newFileItem(newItem);
                         targetList.appendChild(newFile.del);
@@ -324,12 +324,26 @@ angular
         };
 
         $scope.clearAux = function() {
-            // TODO: написать
+            $http.get(`/api/projects/${projectId}/clear-aux`).then(() => {
+                alert("Aux files are deleted");
+            }, () => {
+                $scope.showError();
+            });
         };
 
         $scope.showError = function (message = "Something went wrong") {
-            // TODO: поменять на что-нибудь вразумительное
             alert(message);
         };
 
+
+        // Не работает минимум в яндекс браузере (и насрать в принципе)
+        window.addEventListener('beforeunload', function (e) {
+            if (filesChanged) {
+                $scope.saveDocs();
+
+                e.preventDefault();
+                e.returnValue = "";
+                return "";
+            }
+        }, false);
     }]);

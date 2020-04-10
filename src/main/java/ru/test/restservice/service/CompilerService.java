@@ -69,7 +69,6 @@ public class CompilerService {
             biberMessage = executeTerminalCommand(biber, pathToFile);
         }
 
-        // TODO: возвращать log файл на другую вкладку
         String resultFilePath = file.path.replaceAll("\\.tex$", ".pdf");
         if (Files.exists(Paths.get(project.path + resultFilePath))) {
             return new CompilationResultDTO(latexMessage, biberMessage, project.path + resultFilePath);

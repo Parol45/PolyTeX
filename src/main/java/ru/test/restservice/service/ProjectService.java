@@ -1,12 +1,7 @@
 package ru.test.restservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.treewalk.TreeWalk;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import ru.test.restservice.dao.ProjectRepository;
@@ -17,12 +12,17 @@ import ru.test.restservice.entity.Project;
 import ru.test.restservice.entity.User;
 import ru.test.restservice.exceptions.NotFoundException;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static ru.test.restservice.utils.FileUtils.isAuxFile;
 
 
 @Service
@@ -31,7 +31,7 @@ public class ProjectService {
 
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
-    private final FileService fileService;
+    private final GitService gitService;
 
     public List<ProjectDTO> listProjects(String username) {
         User user = userRepository.findByEmail(username)
@@ -52,9 +52,7 @@ public class ProjectService {
         projectRepository.save(newProj);
         Files.createDirectories(Paths.get("projects/" + newId));
         Files.createFile(Paths.get("projects/" + newId + "/" + projectName + ".tex"));
-        Git git = Git.init().setDirectory(Paths.get("projects/" + newId).toFile()).call();
-        git.add().addFilepattern(".").call();
-        git.commit().setMessage("Initial commit").call();
+        gitService.initRepository("projects/" + newId);
         return new ProjectDTO(newProj);
     }
 
@@ -76,13 +74,11 @@ public class ProjectService {
     }
 
     // TODO: добавить виды прав?
-    // TODO: сообщение для страницы ошибки
     // TODO: удалять проект, если не осталось владельцев
     // TODO: блокирование проекта для одновременной работы
 
-    public void addOwner(UUID projectId, String email) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(NotFoundException::new);
+    public void addOwner(UUID projectId, String email, String owner) {
+        Project project = checkOwnership(projectId, owner);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(NotFoundException::new);
         if (!project.owners.contains(user)) {
@@ -94,9 +90,8 @@ public class ProjectService {
         }
     }
 
-    public void removeOwner(UUID projectId, String email) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(NotFoundException::new);
+    public void removeOwner(UUID projectId, String email, String owner) {
+        Project project = checkOwnership(projectId, owner);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(NotFoundException::new);
         if (project.owners.contains(user)) {
@@ -108,30 +103,27 @@ public class ProjectService {
         }
     }
 
-    public List<CommitDTO> commits(UUID projectId, String email) throws IOException, GitAPIException {
-        List<CommitDTO> result = new ArrayList<>();
+    public List<CommitDTO> listCommits(UUID projectId, String email) throws IOException, GitAPIException {
         Project project = checkOwnership(projectId, email);
-        Git git = Git.open(new File(project.path + "/.git"));
-        git.add().addFilepattern(".").call();
-        git.commit().setMessage("Another test").call();
-        Repository repository = git.getRepository();
-        Iterable<RevCommit> commits = git.log().all().call();
-        for (RevCommit commit : commits) {
-            List<CommitDTO.File> files = new ArrayList<>();
-            RevTree tree = commit.getTree();
-            TreeWalk treeWalk = new TreeWalk(repository);
-            treeWalk.addTree(tree);
-            treeWalk.setRecursive(true);
-            while (treeWalk.next()) {
-                String name = treeWalk.getPathString();
-                if (fileService.isTextFile(name)) {
-                    files.add(new CommitDTO.File(treeWalk.getObjectId(0).name(), "/" + name));
-                }
-            }
-            result.add(new CommitDTO(String.valueOf(commit.getCommitTime()), new Date(commit.getCommitTime() * 1000L),
-                    commit.getAuthorIdent().getName(), commit.getName(), files));
-        }
-        return result;
+        gitService.commit(project.path, "Another test");
+        return gitService.getCommitList(project.path);
     }
 
+    public void clearAuxFiles(UUID projectId, String email) throws IOException {
+        Project project = checkOwnership(projectId, email);
+        Path projectDest = Paths.get(project.path);
+        try (Stream<Path> paths = Files.walk(projectDest)) {
+            paths
+                    .filter(path -> Files.isRegularFile(path))
+                    .forEach(file -> {
+                        if (isAuxFile(file.toString())) {
+                            try {
+                                Files.delete(file);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+        }
+    }
 }

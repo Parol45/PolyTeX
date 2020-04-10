@@ -27,15 +27,19 @@ public class ProjectApiController {
         projectService.deleteProject(projectId, auth.getName());
     }
 
-    // TODO: сюда ещё бахнуть проверку по auth
     @PostMapping("/projects/{projectId}/add-owner")
-    public void addOwner(@PathVariable UUID projectId, @RequestParam String email) {
-        projectService.addOwner(projectId, email);
+    public void addOwner(@PathVariable UUID projectId, @RequestParam String email, Authentication auth) {
+        projectService.addOwner(projectId, email, auth.getName());
     }
 
     @PostMapping("/projects/{projectId}/remove-owner")
-    public void removeOwner(@PathVariable UUID projectId, @RequestParam String email) {
-        projectService.removeOwner(projectId, email);
+    public void removeOwner(@PathVariable UUID projectId, @RequestParam String email, Authentication auth) {
+        projectService.removeOwner(projectId, email, auth.getName());
+    }
+
+    @GetMapping("/projects/{projectId}/clear-aux")
+    public void clearAuxFiles(@PathVariable UUID projectId, Authentication auth) throws IOException {
+        projectService.clearAuxFiles(projectId, auth.getName());
     }
 
 }
