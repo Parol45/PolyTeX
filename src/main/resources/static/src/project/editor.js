@@ -26,7 +26,7 @@ angular
         $scope.closeCurrentFile();
 
         //При загрузке страницы обращение к серверу и получение списка существующих в рабочей папке файлов
-        $http.get("/api/projects/" + projectId + "/files/").then(
+        $http.get(`/api/projects/${projectId}/files/`).then(
             (response) => {
                 $scope.organizeFiles(response.data);
             }, () => {
@@ -61,7 +61,7 @@ angular
         $scope.sendForCompilation = function () {
             $scope.saveOpenedDocLocally();
             if ($scope.openedFile !== null) {
-                $http.post("/api/projects/" + projectId + "/compile/?targetFilepath=" + $scope.openedFile.path, $scope.files.filter(f => f.type === "txt")).then(
+                $http.post(`/api/projects/${projectId}/compile/?targetFilepath=${$scope.openedFile.path}`, $scope.files.filter(f => f.type === "txt")).then(
                     (response) => {
                         if (response.data.pathToPdf !== "") {
                             resultArea.innerHTML = `<embed class='document' src='/${response.data.pathToPdf}'/>`;
@@ -97,7 +97,7 @@ angular
                 let fd = new FormData();
                 fd.append("file", file);
                 fd.append("path", path);
-                $http.post("/api/projects/" + projectId + "/upload/", fd, {
+                $http.post(`/api/projects/${projectId}/upload/`, fd, {
                     transformRequest: angular.identity,
                     headers: {"Content-Type": undefined}
                 }).then((response) => {
@@ -239,7 +239,7 @@ angular
         $scope.saveDocs = function () {
             filesChanged = false;
             $scope.saveOpenedDocLocally();
-            $http.put("/api/projects/" + projectId + "/files/", $scope.files.filter(f => f.type === "txt")).then(() => {
+            $http.put(`/api/projects/${projectId}/files/`, $scope.files.filter(f => f.type === "txt")).then(() => {
                 // TODO: уведомление о сохранении файлов
             }, () => {
                 $scope.showError();
@@ -250,7 +250,7 @@ angular
         $scope.deleteFile = function (link) {
             if (window.confirm("Are you sure?")) {
                 let path = link.id.substr(4);
-                $http.delete("/api/projects/" + projectId + "/files/?path=" + path).then(() => {
+                $http.delete(`/api/projects/${projectId}/files/?path=${path}`).then(() => {
                     // Если удаляемый элемент - папка, то удаляю вложенные элементы
                     let files = $scope.files.filter(f => f.path === path || f.parent === path);
                     for (let i = 0; i < files.length;) {
@@ -309,7 +309,7 @@ angular
                         content: [],
                         parent: parent
                     };
-                    $http.put("/api/projects/" + projectId + "/files", [newItem]).then(() => {
+                    $http.put(`/api/projects/${projectId}/files`, [newItem]).then(() => {
                         $scope.files.push(newItem);
                         let newFile = $scope.newFileItem(newItem);
                         targetList.appendChild(newFile.del);
@@ -324,7 +324,7 @@ angular
         };
 
         $scope.clearAux = function() {
-            $http.get("/api/projects/" + projectId + "/clear-aux").then(() => {
+            $http.get(`/api/projects/${projectId}/clear-aux`).then(() => {
                 alert("Aux files are deleted");
             }, () => {
                 $scope.showError();

@@ -14,7 +14,7 @@ angular
             currentFileArea.innerHTML = "";
             let text = "";
             angular.forEach(curFiles.find(f => f.path === filepath).content, line => {
-                text += line === "" ? "\n" : line + "\n";
+                text += line + "\n";
             });
             currentFileArea.innerText = text;
             return text;
