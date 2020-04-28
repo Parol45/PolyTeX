@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:./database/main;AUTO_SERVER=TRUE
+    url: jdbc:h2:./database/main;
     username: test
     password: test
     sql-script-encoding: UTF-8
@@ -26,6 +26,14 @@ spring:
     server-login-url: https://cas.spbstu.ru/login
     client-host-url: https://localhost:8080
     validation-type: CAS
+
+server:
+  port: 8443
+  ssl:
+    key-store: keystore.p12
+    key-store-password: 12345a
+    keyStoreType: PKCS12
+    keyAlias: tomcat
 
 #    oauth2:
 #      client:

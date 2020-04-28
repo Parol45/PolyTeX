@@ -25,10 +25,11 @@ class SecurityController {
     }
 
     @GetMapping("/registration")
-    public String registerPage() {
+    public String registrationPage() {
         return "registration";
     }
 
+    // TODO: обрабатывать нарушение уник индекса
     @Transactional
     @PostMapping("/registration")
     public RedirectView register(@RequestParam("email") String email,

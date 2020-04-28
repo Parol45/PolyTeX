@@ -1,8 +1,10 @@
 package ru.test.restservice.api;
 
 import lombok.RequiredArgsConstructor;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.test.restservice.dto.CommitDTO;
 import ru.test.restservice.dto.FileItemDTO;
 import ru.test.restservice.service.FileService;
 import ru.test.restservice.service.GitService;
@@ -56,4 +58,8 @@ public class FileApiController {
         fileService.deleteFile(path, projectId);
     }
 
+    @PostMapping("/projects/{projectId}/rollback/")
+    public void rollback(@PathVariable UUID projectId, @RequestBody CommitDTO.File file) throws IOException, GitAPIException {
+        gitService.rollback(projectId, file);
+    }
 }

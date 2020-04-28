@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Diplom</title>
-    <link rel="stylesheet" type="text/css" href="../../static/src/project/editor.css" th:href="@{/src/project/editor.css}">
-    <link rel="shortcut icon" type="image/png" href="../../static/favicon.png" th:href="@{/favicon.png}">
-    <link rel="icon" type="image/png" href="../../static/favicon.png" th:href="@{/favicon.png}">
+    <link rel="stylesheet" type="text/css" href="../../static/project/editor.css" th:href="@{/project/editor.css}">
+    <link rel="shortcut icon" type="image/png" href="../../static/favicon.ico" th:href="@{/favicon.ico}">
+    <link rel="icon" type="image/png" href="../../static/favicon.ico" th:href="@{/favicon.ico}">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
-    <script src="../../static/src/project/editor.js" th:src="@{/src/project/editor.js}"></script>
+    <script src="../../static/project/editor.js" th:src="@{/project/editor.js}"></script>
     <script th:inline="javascript">/*<![CDATA[*/
     var projectId = /*[[${projectId}]]*/ 'default'; /*]]>*/
     var filesChanged = false;
@@ -25,6 +25,7 @@
     </form>
     <button class="clear-butt" ng-click="clearAux()">Clear aux files</button>
     <a th:href="@{/projects/{id}/history(id=${projectId})}">to history</a>
+    <a href="/projects" style="margin-left: 20px">to projects</a>
 </header>
 
 <div class="flex-container">
