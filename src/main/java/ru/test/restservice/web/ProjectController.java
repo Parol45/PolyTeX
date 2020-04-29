@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 import ru.test.restservice.service.FileService;
+import ru.test.restservice.service.GitService;
 import ru.test.restservice.service.ProjectService;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final FileService fileService;
+    private final GitService gitService;
 
     @GetMapping(value = {"", "/"})
     public RedirectView redir() {
@@ -34,9 +36,9 @@ public class ProjectController {
         return projs;
     }
 
-    @GetMapping("/projects/{projectId}")
+    @GetMapping("/projects/{projectId}/")
     public ModelAndView openProject(@PathVariable UUID projectId, Authentication auth) {
-        projectService.checkOwnership(projectId, auth.getName());
+        projectService.getProjectForUser(projectId, auth.getName());
         ModelAndView main = new ModelAndView("project/editor");
         main.addObject("projectId", projectId);
         return main;

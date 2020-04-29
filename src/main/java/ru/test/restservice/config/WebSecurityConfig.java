@@ -20,8 +20,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("test").password(passwordEncoder().encode("test")).roles("ADMIN");
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
@@ -38,10 +36,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 //.antMatchers("/h2-console", "/admin/**").hasAnyRole("ADMIN")
                 //.and()
                 //.authorizeRequests()
-                .antMatchers("/", "/api/**", "/projects/**").hasAnyRole("USER", "ADMIN")
+                .antMatchers("/api/**", "/projects/**").hasAnyRole("USER", "ADMIN")
                 .and()
                 .authorizeRequests()
-                .antMatchers("/registration", "/login/**").permitAll()
+                .antMatchers("/registration/**", "/login/**", "/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()

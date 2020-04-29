@@ -3,10 +3,10 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" type="image/png" href="../../static/favicon.png" th:href="@{/favicon.png}">
-    <link rel="icon" type="image/png" href="../../static/favicon.png" th:href="@{/favicon.png}">
+    <link rel="shortcut icon" type="image/png" href="../../static/favicon.ico" th:href="@{favicon.ico}">
+    <link rel="icon" type="image/png" href="../../static/favicon.ico" th:href="@{favicon.ico}">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
-    <script src="../../static/src/project/list.js" th:src="@{/src/project/list.js}"></script>
+    <script src="../../static/project/list.js" th:src="@{/project/list.js}"></script>
     <script th:inline="javascript">/*<![CDATA[*/
     var projects = /*[[${projects}]]*/ 'default' </script>
     <title>Your projects</title>
@@ -33,7 +33,7 @@
     </tr>
     <tr ng-attr-id="project.id" ng-repeat="project in projects">
         <td>{{project.id}}</td>
-        <td><a ng-attr-href="{{'/projects/' + project.id}}">{{project.name}}</a></td>
+        <td><a ng-attr-href="{{'/projects/' + project.id + '/'}}">{{project.name}}</a></td>
         <td>{{project.owners}}</td>
         <td>
             <input type="text" ng-attr-id="{{'add-' + project.id}}" placeholder="email">

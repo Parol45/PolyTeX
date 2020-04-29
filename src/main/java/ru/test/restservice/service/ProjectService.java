@@ -11,6 +11,7 @@ import ru.test.restservice.dto.ProjectDTO;
 import ru.test.restservice.entity.Project;
 import ru.test.restservice.entity.User;
 import ru.test.restservice.exceptions.NotFoundException;
+import ru.test.restservice.utils.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,8 +22,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static ru.test.restservice.utils.FileUtils.isAuxFile;
 
 
 @Service
@@ -57,12 +56,12 @@ public class ProjectService {
     }
 
     public void deleteProject(UUID projectId, String email) {
-        Project projectToDelete = checkOwnership(projectId, email);
+        Project projectToDelete = getProjectForUser(projectId, email);
         FileSystemUtils.deleteRecursively(Paths.get(projectToDelete.path).toFile());
         projectRepository.delete(projectToDelete);
     }
 
-    public Project checkOwnership(UUID projectId, String email) {
+    public Project getProjectForUser(UUID projectId, String email) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(NotFoundException::new);
         User user = userRepository.findByEmail(email)
@@ -73,12 +72,11 @@ public class ProjectService {
         return project;
     }
 
-    // TODO: добавить виды прав?
     // TODO: удалять проект, если не осталось владельцев
     // TODO: блокирование проекта для одновременной работы
 
     public void addOwner(UUID projectId, String email, String owner) {
-        Project project = checkOwnership(projectId, owner);
+        Project project = getProjectForUser(projectId, owner);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(NotFoundException::new);
         if (!project.owners.contains(user)) {
@@ -91,7 +89,7 @@ public class ProjectService {
     }
 
     public void removeOwner(UUID projectId, String email, String owner) {
-        Project project = checkOwnership(projectId, owner);
+        Project project = getProjectForUser(projectId, owner);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(NotFoundException::new);
         if (project.owners.contains(user)) {
@@ -104,26 +102,18 @@ public class ProjectService {
     }
 
     public List<CommitDTO> listCommits(UUID projectId, String email) throws IOException, GitAPIException {
-        Project project = checkOwnership(projectId, email);
+        Project project = getProjectForUser(projectId, email);
         gitService.commit(project.path, "Another test");
         return gitService.getCommitList(project.path);
     }
 
     public void clearAuxFiles(UUID projectId, String email) throws IOException {
-        Project project = checkOwnership(projectId, email);
+        Project project = getProjectForUser(projectId, email);
         Path projectDest = Paths.get(project.path);
         try (Stream<Path> paths = Files.walk(projectDest)) {
             paths
                     .filter(path -> Files.isRegularFile(path))
-                    .forEach(file -> {
-                        if (isAuxFile(file.toString())) {
-                            try {
-                                Files.delete(file);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
+                    .forEach(FileUtils::deleteAux);
         }
     }
 }

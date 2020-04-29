@@ -11,8 +11,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import ru.test.restservice.dao.UserRepository;
 import ru.test.restservice.entity.User;
 
-import javax.transaction.Transactional;
-
 @Controller
 @RequiredArgsConstructor
 class SecurityController {
@@ -25,11 +23,11 @@ class SecurityController {
     }
 
     @GetMapping("/registration")
-    public String registerPage() {
+    public String registrationPage() {
         return "registration";
     }
 
-    @Transactional
+    // TODO: обрабатывать нарушение уник индекса
     @PostMapping("/registration")
     public RedirectView register(@RequestParam("email") String email,
                                  @RequestParam("password") String password) {
