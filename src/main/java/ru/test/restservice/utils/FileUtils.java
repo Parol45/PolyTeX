@@ -1,5 +1,9 @@
 package ru.test.restservice.utils;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class FileUtils {
 
     // Список разрешённых файловых расширений
@@ -24,4 +28,13 @@ public class FileUtils {
         return name.matches(AUX_FILE_REGEX);
     }
 
+    public static void deleteAux(Path file) {
+        if (isAuxFile(file.toString())) {
+            try {
+                Files.delete(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

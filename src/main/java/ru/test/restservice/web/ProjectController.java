@@ -38,7 +38,7 @@ public class ProjectController {
 
     @GetMapping("/projects/{projectId}/")
     public ModelAndView openProject(@PathVariable UUID projectId, Authentication auth) {
-        projectService.checkOwnership(projectId, auth.getName());
+        projectService.getProjectForUser(projectId, auth.getName());
         ModelAndView main = new ModelAndView("project/editor");
         main.addObject("projectId", projectId);
         return main;

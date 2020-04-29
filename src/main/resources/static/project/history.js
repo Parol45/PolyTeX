@@ -54,7 +54,7 @@ angular
 
         $scope.rollback = function() {
             if ($scope.selectedFile !== null) {
-                $http.post("/api/projects/" + projectId + "/rollback/", {id: $scope.selectedFile.id, name: $scope.selectedFile.name}).then((response) => {
+                $http.post("/api/projects/" + projectId + "/rollback/?commitDate=" + $scope.selectedLink.text, {id: $scope.selectedFile.id, name: $scope.selectedFile.name}).then((response) => {
                     console.log(response);
                     document.location.reload(true);
                 }, () => {

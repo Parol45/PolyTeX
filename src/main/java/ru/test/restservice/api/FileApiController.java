@@ -59,7 +59,7 @@ public class FileApiController {
     }
 
     @PostMapping("/projects/{projectId}/rollback/")
-    public void rollback(@PathVariable UUID projectId, @RequestBody CommitDTO.File file) throws IOException, GitAPIException {
-        gitService.rollback(projectId, file);
+    public void rollback(@PathVariable UUID projectId, @RequestBody CommitDTO.File file, @RequestParam String commitDate) throws IOException, GitAPIException {
+        gitService.rollback(projectId, file, commitDate);
     }
 }
