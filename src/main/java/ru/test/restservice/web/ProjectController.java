@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 import ru.test.restservice.service.FileService;
-import ru.test.restservice.service.GitService;
 import ru.test.restservice.service.ProjectService;
 
 import java.io.IOException;
@@ -22,7 +21,6 @@ public class ProjectController {
 
     private final ProjectService projectService;
     private final FileService fileService;
-    private final GitService gitService;
 
     @GetMapping(value = {"", "/"})
     public RedirectView redir() {
@@ -33,6 +31,7 @@ public class ProjectController {
     public ModelAndView listProjects(Authentication auth) {
         ModelAndView projs = new ModelAndView("project/list");
         projs.addObject("projects", projectService.listProjects(auth.getName()));
+        projs.addObject("userEmail", auth.getName());
         return projs;
     }
 

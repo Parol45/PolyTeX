@@ -6,10 +6,9 @@ Web-based LaTeX compiler/interpreter
 ## Backend:
 
 1. Make authentication/authorization via polytech's sso
-2. Blocking simultaneous work on a project
-3. Add DB? logging
-4. Add git rollback
-5. Change project deletion to removing rights to redact it
+2. Block simultaneous work on a project
+3. Add DB? logging 
+4. Add admin page
 
 ## Frontend:
 

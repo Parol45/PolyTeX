@@ -3,6 +3,7 @@ package ru.test.restservice.api;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.test.restservice.dto.ProjectDTO;
 import ru.test.restservice.service.ProjectService;
@@ -22,11 +23,6 @@ public class ProjectApiController {
         return projectService.createNewProject(projectName, auth.getName());
     }
 
-    @DeleteMapping("/projects/{projectId}")
-    public void deleteProject(@PathVariable UUID projectId, Authentication auth) {
-        projectService.deleteProject(projectId, auth.getName());
-    }
-
     @PostMapping("/projects/{projectId}/add-owner")
     public void addOwner(@PathVariable UUID projectId, @RequestParam String email, Authentication auth) {
         projectService.addOwner(projectId, email, auth.getName());
@@ -42,4 +38,8 @@ public class ProjectApiController {
         projectService.clearAuxFiles(projectId, auth.getName());
     }
 
+    @GetMapping("/user")
+    public Object user(@AuthenticationPrincipal Object oauth2User) {
+        return oauth2User;
+    }
 }

@@ -3,7 +3,6 @@ package ru.test.restservice.service;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 import ru.test.restservice.dao.ProjectRepository;
 import ru.test.restservice.dao.UserRepository;
 import ru.test.restservice.dto.CommitDTO;
@@ -54,13 +53,6 @@ public class ProjectService {
         gitService.initRepository("projects/" + newId);
         return new ProjectDTO(newProj);
     }
-
-    public void deleteProject(UUID projectId, String email) {
-        Project projectToDelete = getProjectForUser(projectId, email);
-        FileSystemUtils.deleteRecursively(Paths.get(projectToDelete.path).toFile());
-        projectRepository.delete(projectToDelete);
-    }
-
     public Project getProjectForUser(UUID projectId, String email) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(NotFoundException::new);
@@ -72,7 +64,6 @@ public class ProjectService {
         return project;
     }
 
-    // TODO: удалять проект, если не осталось владельцев
     // TODO: блокирование проекта для одновременной работы
 
     public void addOwner(UUID projectId, String email, String owner) {
@@ -96,6 +87,9 @@ public class ProjectService {
             project.owners.remove(user);
             userRepository.save(user);
             projectRepository.save(project);
+            if (project.owners.size() == 0) {
+                projectRepository.delete(project);
+            }
         } else {
             throw new NotFoundException();
         }

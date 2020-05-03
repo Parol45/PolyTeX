@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- TODO: убрать пользователя из "убрать владельца" -->
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +7,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
     <script src="../../static/project/list.js" th:src="@{/project/list.js}"></script>
     <script th:inline="javascript">/*<![CDATA[*/
-    var projects = /*[[${projects}]]*/ 'default' </script>
+    var projects = /*[[${projects}]]*/ 'default', email = /*[[${userEmail}]]*/ 'default'</script>
     <title>Your projects</title>
 </head>
 <body ng-app="app" ng-controller="ctrl">
@@ -29,7 +28,6 @@
         <td>Владельцы</td>
         <td>Добавить владельца</td>
         <td>Убрать владельца</td>
-        <td>Удалить проект</td>
     </tr>
     <tr ng-attr-id="project.id" ng-repeat="project in projects">
         <td>{{project.id}}</td>
@@ -45,7 +43,6 @@
             </select>
             <button type="submit" ng-click="deleteOwner(project.id)">Remove</button>
         </td>
-        <td><a ng-click="deleteProject(project.id)" href>Удалить</a></td>
     </tr>
 </table>
 

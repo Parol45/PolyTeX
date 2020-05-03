@@ -41,19 +41,14 @@ angular
                 () => {
                     let projectUsers = $scope.projects.find(p => p.id === projectId).owners;
                     projectUsers.splice(projectUsers.indexOf(projectUsers.find(u => u === email)));
+                    if (projectUsers.length === 0) {
+                        $scope.projects.splice($scope.projects.indexOf(projectId), 1);
+                    }
                 }, () => {
                     $scope.showError();
                 });
         };
 
-        $scope.deleteProject = function (projectId) {
-            $http.delete("/api/projects/" + projectId).then(() => {
-                let deletedProj = $scope.projects.find(p => p.id === projectId);
-                $scope.projects.splice($scope.projects.indexOf(deletedProj), 1);
-            }, () => {
-                $scope.showError();
-            });
-        };
 
         $scope.showError = function (message = "Something went wrong") {
             alert(message);
