@@ -18,7 +18,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import static ru.test.restservice.MainApplication.isWindows;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +29,7 @@ public class CompilerService {
         StringBuilder messageBuilder = new StringBuilder();
         try {
             ProcessBuilder pBuilder = new ProcessBuilder();
+            boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
             if (isWindows) {
                 pBuilder.command("cmd.exe", "/c", command);
             } else {

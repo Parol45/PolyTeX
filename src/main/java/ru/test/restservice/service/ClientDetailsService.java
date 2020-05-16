@@ -15,11 +15,13 @@ import java.util.Collections;
 public class ClientDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final LogService logService;
 
     @Override
     public User loadUserByUsername(String email) {
         ru.test.restservice.entity.User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("email: " + email));
+        logService.log(email, String.format("%s logged in", user.email));
         return new User(user.email, user.password, Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
     }
 

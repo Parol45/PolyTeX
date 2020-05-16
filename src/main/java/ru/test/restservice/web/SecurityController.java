@@ -10,12 +10,14 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 import ru.test.restservice.dao.UserRepository;
 import ru.test.restservice.entity.User;
+import ru.test.restservice.service.LogService;
 
 @Controller
 @RequiredArgsConstructor
 class SecurityController {
 
     private final UserRepository userRepository;
+    private final LogService logService;
 
     @GetMapping("/login")
     public String loginPage() {
@@ -33,6 +35,7 @@ class SecurityController {
                                  @RequestParam("password") String password) {
         User newUser = new User(email, new BCryptPasswordEncoder(4).encode(password));
         userRepository.save(newUser);
+        logService.log(email, String.format("User %s has registrated", newUser.email));
         return new RedirectView("/projects");
     }
 

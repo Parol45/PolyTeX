@@ -23,7 +23,7 @@ public class Project {
 
     public String path;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     public Set<User> owners = new HashSet<>();
 
 }

@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:./database/main;
+    #username: *****
+    #password: ************
+    sql-script-encoding: UTF-8
+  jpa:
+    hibernate:
+      ddl-auto: update
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: deferred
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+  security:
+    oauth2:
+      client:
+        provider:
+          spbstu:
+            authorization-uri: https://cas.spbstu.ru/oauth2.0/authorize
+            token-uri: https://cas.spbstu.ru/oauth2.0/accessToken
+            user-info-uri: https://cas.spbstu.ru/oauth2.0/profile
+            user-name-attribute: id
+        registration:
+          spbstu:
+            #client-id: *******************************
+            #client-secret: *************************************
+            authorization-grant-type: authorization_code
+            redirect-uri: https://latex.icst.spbstu.ru/callback
