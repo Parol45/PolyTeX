@@ -40,7 +40,7 @@ angular
             $http.post("/api/projects/" + projectId +"/remove-owner?email=" + email.value).then(
                 () => {
                     let projectUsers = $scope.projects.find(p => p.id === projectId).owners;
-                    projectUsers.splice(projectUsers.indexOf(projectUsers.find(u => u === email)));
+                    projectUsers.splice(projectUsers.indexOf(projectUsers.find(u => u === email.value)), 1);
                     if (projectUsers.length === 0) {
                         $scope.projects.splice($scope.projects.indexOf(projectId), 1);
                     }
@@ -48,7 +48,6 @@ angular
                     $scope.showError();
                 });
         };
-
 
         $scope.showError = function (message = "Something went wrong") {
             alert(message);

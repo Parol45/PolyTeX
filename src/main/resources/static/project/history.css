@@ -48,25 +48,22 @@ span {
 
 select {
     width: 150px;
+    margin-right: 0;
 }
 
-#current-doc, #commit-doc {
-    width: 41%;
-}
-
-#commit-list, #commit-select {
-    width: 18%;
+#current-doc {
+    width: 67%;
 }
 
 .page-name {
-    width: 20%;
+    width: 34%;
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#current-file-select, #commit-file-select {
-    width: 21%;
+#file-select, #commit-select, #commit-list {
+    width: 33%;
 }
 
 #commit-select {

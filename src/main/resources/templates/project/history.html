@@ -7,56 +7,40 @@
     <link rel="icon" type="image/png" href="../../static/favicon.ico" th:href="@{/favicon.ico}">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
     <script src="../../static/project/history.js" th:src="@{/project/history.js}"></script>
+    <link rel="stylesheet" type="text/css" href="../../static/project/jsdifflib/diffview.css" th:href="@{/project/jsdifflib/diffview.css}">
+    <script src="../../static/project/jsdifflib/difflib.js" th:src="@{/project/jsdifflib/difflib.js}"></script>
+    <script src="../../static/project/jsdifflib/diffview.js" th:src="@{/project/jsdifflib/diffview.js}"></script>
     <script th:inline="javascript">/*<![CDATA[*/
     var projectId = /*[[${projectId}]]*/ 'default', commits = /*[[${commits}]]*/ 'default',
         curFiles = /*[[${files}]]*/ 'default'; /*]]>*/ </script>
-    <title>Project melody</title>
+    <title>Project history</title>
 </head>
 <body ng-app="app" ng-controller="ctrl">
 <header>
+
     <div class="page-name">
-        <h1>&nbsp;Current version </h1>
-        <a th:href="@{'/projects/' + ${projectId} + '/'}">to the project</a>
+        <h1><a th:href="@{'/projects/' + ${projectId} + '/'}">←</a></h1>
+        <h1>&nbsp;File comparison</h1>
     </div>
 
-    <div class="main-panel" id="current-file-select">
+    <div class="main-panel" id="file-select">
         <span class="before"></span>
         <span class="inner">
-        <select onchange="angular.element(this).scope().showCurrentFile(value)">
-            <option value="" disabled selected>Select file</option>
-            <th:block th:each="file : ${files}">
-                <option th:value="${file.path}" th:text="${file.path}">Файл</option>
-            </th:block>
+        <select onchange="angular.element(this).scope().showFilesDiff(value)">
+            <option id="null-file" value="" disabled selected>Select file</option>
+            <option ng-repeat="filename in allFiles">{{filename}}</option>
         </select>
-        </span>
-    </div>
-
-    <div class="page-name">
-        <h1>&nbsp;Commit version</h1>
         <button ng-click="rollback()">rollback</button>
-    </div>
-
-    <div class="main-panel" id="commit-file-select">
-        <span class="before"></span>
-        <span class="inner">
-        <select onchange="angular.element(this).scope().showCommitFile(value)">
-            <option id="commit-null" value="" disabled selected>Select file</option>
-            <option id="{{file.id}}" ng-repeat="file in commitFiles">{{file.name}}</option>
-        </select>
         </span>
     </div>
 
-    <div id="commit-select">
+    <div class="main-panel" id="commit-select">
         <h2>Select commit:</h2>
     </div>
 </header>
 
 <div class="flex-container">
     <div class="main-panel" id="current-doc">
-
-    </div>
-
-    <div class="main-panel" id="commit-doc">
 
     </div>
 

@@ -112,6 +112,7 @@ public class FileService {
         }
     }
 
+    // TODO: удалять файлы из git tree
     public void deleteFile(String path, UUID projectId) throws IOException {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         Path fileToDeletePath = Paths.get(project.path + path);

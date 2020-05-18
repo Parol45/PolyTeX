@@ -1,67 +1,85 @@
 angular
     .module("app", [])
     .controller("ctrl", ['$scope', '$http', function ($scope, $http) {
+
+        $scope.allFiles = [];
         $scope.commitFiles = [];
         $scope.selectedLink = null;
         $scope.selectedFile = null;
 
-        // TODO: прикрутить библиотеку diffs
-
         let currentFileArea = document.querySelector("#current-doc");
-        let commitFileArea = document.querySelector("#commit-doc");
 
-
-        $scope.showCurrentFile = function (filepath) {
+        $scope.showFilesDiff = function (filepath) {
             currentFileArea.innerHTML = "";
-            let text = "";
-            angular.forEach(curFiles.find(f => f.path === filepath).content, line => {
-                text += line + "\n";
-            });
-            currentFileArea.innerText = text;
-            return text;
-        };
+            let curFile = curFiles.find(file => file.path === filepath),
+                commFile = $scope.commitFiles.find(file => file.name === filepath),
+                curText = "", commText = "";
+            $scope.selectedFile = commFile;
+            if (curFile) {
+                curText = curFile.content;
+            }
+            if (commFile) {
+                commText = difflib.stringAsLines(commFile.content);
+                commText.pop();
+            }
 
-        $scope.showCommitFile = function (filepath) {
-            let file = $scope.commitFiles.find(f => f.name === filepath);
-            commitFileArea.innerText = file.content;
-            $scope.selectedFile = file;
-            return file.content;
+            let sm = new difflib.SequenceMatcher(commText, curText);
+            currentFileArea.appendChild(diffview.buildView({
+                baseTextLines: commText,
+                newTextLines: curText,
+                opcodes: sm.get_opcodes(),
+                baseTextName: "Commit version",
+                newTextName: "current file",
+                contextSize: null,
+                viewType: 1
+            }));
+
         };
 
         $scope.loadCommitFiles = function (link) {
-            if ($scope.selectedLink !== null) {
+            if ($scope.selectedLink) {
                 $scope.selectedLink.parentElement.style.background = null;
             }
             $scope.selectedLink = link;
             $scope.selectedLink.parentElement.style.background = "#999999";
-            commitFileArea.innerHTML = "";
-            document.querySelector("#commit-null").selected = true;
+
+            document.querySelector("#null-file").selected = true;
             $scope.selectedFile = null;
+            $scope.allFiles = [];
+
+            currentFileArea.innerHTML = "";
 
             $scope.commitFiles = commits.find(c => c.commitId === link.id).files;
-            $scope.$apply();
-
             let ids = $scope.commitFiles.map(f => f.id);
-            $http.post("/api/projects/" + projectId + "/commit-files/", ids).then((response) => {
+            $http.post(`/api/projects/${projectId}/commit-files/`, ids).then((response) => {
                 angular.forEach(ids, (id, i) => {
-                    let file = $scope.commitFiles[i];
-                    file.content = response.data[i];
+                    $scope.commitFiles[i].content = response.data[i];
                 });
             }, () => {
                 $scope.showError();
             });
+            $scope.allFiles = curFiles.map(file => file.path)
+                .concat($scope.commitFiles.map(file => file.name))
+                .filter((file, i, files) => files.indexOf(file) === i);
+            $scope.$apply();
         };
 
-        $scope.rollback = function() {
-            if ($scope.selectedFile !== null) {
-                $http.post("/api/projects/" + projectId + "/rollback/?commitDate=" + $scope.selectedLink.text, {id: $scope.selectedFile.id, name: $scope.selectedFile.name}).then((response) => {
-                    console.log(response);
-                    document.location.reload(true);
-                }, () => {
-                    $scope.showError();
-                });
+        $scope.rollback = function () {
+            if ($scope.selectedLink) {
+                if ($scope.selectedFile) {
+                    $http.post(`/api/projects/${projectId}/rollback/?commitDate=${$scope.selectedLink.text}`, {
+                        id: $scope.selectedFile.id,
+                        name: $scope.selectedFile.name
+                    }).then(() => {
+                        document.location.reload(true);
+                    }, () => {
+                        $scope.showError();
+                    });
+                } else {
+                    $scope.showError("No such file in selected commit");
+                }
             } else {
-                $scope.showError("No file or commit chosen");
+                $scope.showError("No commit chosen");
             }
         };
 
