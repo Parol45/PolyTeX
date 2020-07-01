@@ -13,6 +13,8 @@ import java.util.UUID;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+
+// TODO: убрать path, потому что это "projects/" + id
 public class Project {
 
     @Id
@@ -22,6 +24,8 @@ public class Project {
     public String name;
 
     public String path;
+
+    public UUID creatorId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     public Set<User> owners = new HashSet<>();

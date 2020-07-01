@@ -1,0 +1,137 @@
+html, body, .container-block, .document, #file-list {
+    height: 100%;
+}
+
+.container-block, .document, .flex-container {
+    width: 100%;
+}
+
+html, body, header, .main-panel, #logout-form, img, h1 {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    overflow: auto;
+}
+
+b {
+    font-size: x-large;
+}
+
+header b {
+    display: flex;
+    align-items: center;
+    vertical-align: center;
+}
+
+.logo {
+    padding-right: 10px;
+    width: 15%;
+    height: 15%;
+}
+
+.main {
+    height: auto;
+    min-height: 100%;
+}
+
+.list {
+    width: 100%;
+}
+
+header .container {
+    background-color: #419B5F;
+}
+
+header .container, .list {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+header .container b {
+    color: #FAFAFA;
+}
+
+.settings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.container, .list {
+    width: 100%;
+    padding: 0;
+    margin: 0 auto;
+}
+
+.main-nav ul {
+    margin: 1em 0 .5em;
+    text-align: center;
+}
+.main-nav li {
+    display: inline;
+}
+.main-nav a {
+    display: inline-block;
+    padding: .5em 1.5em;
+}
+
+header a:visited,
+header a:link,
+.main-nav a:visited,
+.main-nav a:link {
+    color: #FAFAFA;
+    text-decoration:none;
+}
+header a:active,
+header a:hover,
+.main-nav a:active,
+.main-nav a:hover {
+    background-color: #398954;
+}
+
+.unselectable-text {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+/* Выпадающее меню */
+.main-nav-list > li {
+    position: relative;
+}
+
+.submenu {
+    margin: 0;
+    padding: 0;
+    left: -20px;
+    top: 10px;
+    list-style: none;
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    background-color: #419B5F;
+    border-top: 1px solid #257540;
+}
+.submenu > li > a {
+    display: block;
+    color: white;
+    background-color: #419B5F;
+    text-decoration: none;
+}
+.submenu > li > a:hover {
+    background-color: #398954;
+}
+
+.main-nav-list > li:hover > ul.submenu {
+    display: flex;
+}

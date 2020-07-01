@@ -2,40 +2,46 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="../../static/project/history.css" th:href="@{/project/history.css}">
-    <link rel="shortcut icon" type="image/png" href="../../static/favicon.ico" th:href="@{/favicon.ico}">
-    <link rel="icon" type="image/png" href="../../static/favicon.ico" th:href="@{/favicon.ico}">
+    <link rel="stylesheet" type="text/css" href="../../static/css/shared.css" th:href="@{/css/shared.css}">
+    <link rel="stylesheet" type="text/css" href="../../static/css/project/history.css"
+          th:href="@{/css/project/history.css}">
+    <link rel="stylesheet" type="text/css" href="../../static/css/project/jsdifflib/diffview.css"
+          th:href="@{/css/project/jsdifflib/diffview.css}">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png"
+          th:href="@{/favicon-32x32.png}">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png"
+          th:href="@{/favicon-16x16.png}">
+    <link rel="shortcut icon" type="image/png" href="../../static/favicon-32x32.png" th:href="@{/favicon-32x32.png}">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
-    <script src="../../static/project/history.js" th:src="@{/project/history.js}"></script>
-    <link rel="stylesheet" type="text/css" href="../../static/project/jsdifflib/diffview.css" th:href="@{/project/jsdifflib/diffview.css}">
-    <script src="../../static/project/jsdifflib/difflib.js" th:src="@{/project/jsdifflib/difflib.js}"></script>
-    <script src="../../static/project/jsdifflib/diffview.js" th:src="@{/project/jsdifflib/diffview.js}"></script>
+    <script src="../../static/js/project/history.js" th:src="@{/js/project/history.js}"></script>
+    <script src="../../static/js/project/jsdifflib/difflib.js" th:src="@{/js/project/jsdifflib/difflib.js}"></script>
+    <script src="../../static/js/project/jsdifflib/diffview.js" th:src="@{/js/project/jsdifflib/diffview.js}"></script>
     <script th:inline="javascript">/*<![CDATA[*/
     var projectId = /*[[${projectId}]]*/ 'default', commits = /*[[${commits}]]*/ 'default',
         curFiles = /*[[${files}]]*/ 'default'; /*]]>*/ </script>
-    <title>Project history</title>
+    <title>История изменения проекта - PolyTeX - LaTeX Editor</title>
 </head>
 <body ng-app="app" ng-controller="ctrl">
+
 <header>
-
-    <div class="page-name">
-        <h1><a th:href="@{'/projects/' + ${projectId} + '/'}">←</a></h1>
-        <h1>&nbsp;File comparison</h1>
-    </div>
-
-    <div class="main-panel" id="file-select">
-        <span class="before"></span>
-        <span class="inner">
-        <select onchange="angular.element(this).scope().showFilesDiff(value)">
-            <option id="null-file" value="" disabled selected>Select file</option>
-            <option ng-repeat="filename in allFiles">{{filename}}</option>
-        </select>
-        <button ng-click="rollback()">rollback</button>
-        </span>
-    </div>
-
-    <div class="main-panel" id="commit-select">
-        <h2>Select commit:</h2>
+    <div class="container">
+        <b class="unselectable-text"><img alt="ИКНТ"
+                                          class="logo"
+                                          src="https://dl.spbstu.ru/pluginfile.php/1/core_admin/logocompact/0x70/1590582551/logo_iknt.png">PolyTeX
+            - LaTeX Editor</b>
+        <nav class="main-nav">
+            <ul class="main-nav-list">
+                <li>
+                    <a ng-attr-href="{{'/projects/' + projectId + '/'}}">Вернуться к проекту</a>
+                </li>
+                <li>
+                    <a href="/projects">Вернуться на главную</a>
+                </li>
+                <li>
+                    <a href="/logout">Выйти из системы</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </header>
 
@@ -45,14 +51,36 @@
     </div>
 
     <div class="main-panel" id="commit-list">
-        <ul>
-            <th:block th:each="commit : ${commits}">
-                <li>
-                    <a th:text="${commit.commitTime}" th:id="${commit.commitId}" href
-                       onclick="angular.element(this).scope().loadCommitFiles(this)">Commit</a>
-                </li>
-            </th:block>
-        </ul>
+        <div class="control-panel">
+            <button ng-click="commit()">Сохранить текущую версию проекта</button>
+            <h2>Выбор версий для сравнения:</h2>
+            <label for="first-version">Старшая версия: </label>
+            <select id="first-version" ng-model="first"
+                    onchange="angular.element(this).scope().selectFirstVersion(value)">
+                <option disabled id="null-version1" selected value="">Выберите версию</option>
+                <option value="cur">Текущая версия</option>
+                <option ng-repeat="commit in firstVersion.slice(0, firstVersion.length-1)" ng-value="commit.commitId">
+                    {{formatDate(commit.commitTime)}} by
+                    {{commit.author}}
+                </option>
+            </select>
+            <br>
+            <label for="second-version">Младшая версия: </label>
+            <select disabled id="second-version" onchange="angular.element(this).scope().selectSecondVersion(value)">
+                <option disabled id="null-version2" selected value="">Выберите версию</option>
+                <option ng-repeat="commit in secondVersion" ng-value="commit.commitId">{{formatDate(commit.commitTime)}}
+                    by
+                    {{commit.author}}
+                </option>
+            </select>
+        </div>
+        <h2>Выбор файла для сравнения:</h2>
+        <select id="file-select" onchange="angular.element(this).scope().firstDownload(value)">
+            <option disabled id="null-file" selected value="">Выберите файл</option>
+            <option ng-repeat="filename in allFiles">{{filename}}</option>
+        </select>
+        <br>
+        <button hidden id="rollback-button" ng-click="rollback()">Вернуть файл к младшей версии</button>
     </div>
 </div>
 </body>

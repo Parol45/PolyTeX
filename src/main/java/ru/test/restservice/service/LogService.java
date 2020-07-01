@@ -24,8 +24,8 @@ public class LogService {
 
     public void log(String username, UUID project_id, String action) {
         User user = userRepository.findByEmail(username).orElseThrow(NotFoundException::new);
-        String id = user.getUser_id().toString() + System.currentTimeMillis();
-        logRepository.save(new LogEntry(id, user.getUser_id(), project_id, LocalDateTime.now(), action));
+        UUID id = UUID.randomUUID();
+        logRepository.save(new LogEntry(id, user.getId(), project_id, LocalDateTime.now(), action));
     }
 
 }

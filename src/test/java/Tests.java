@@ -13,17 +13,13 @@ import ru.test.restservice.dao.ProjectRepository;
 import ru.test.restservice.dao.UserRepository;
 import ru.test.restservice.dto.FileItemDTO;
 import ru.test.restservice.entity.User;
+import ru.test.restservice.utils.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -82,20 +78,14 @@ public class Tests {
             userRepository.delete(dbUser.get());
         }
 
-        mockMvc.perform(get("/registration")).andExpect(status().isOk());
-        mockMvc.perform(post("/registration")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .content(buildUrlEncodedFormEntity(
-                        "email", "test_test",
-                        "password", "12345"
-                ))).andExpect(status().isFound());
+        userRepository.save(new User("test_test", "$2a$04$BWkZIR3S7Z8gXdHExCgxJu.HhAE.sRGNXcC6NIm0mQDnUo25.T6ae", "ROLE_USER", false));
 
         mockMvc.perform(get("/login")).andExpect(status().isOk());
         mockMvc.perform(post("/login")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .content(buildUrlEncodedFormEntity(
                         "email", "test_test",
-                        "password", "12345"
+                        "password", "polytexisnotthebest"
                 ))).andExpect(status().isFound());
 
         // isFound грубо говоря означает, что доступа к странице нет и произошёл редирект на /login
@@ -111,7 +101,7 @@ public class Tests {
         User dbUser = userRepository.findByEmail("test_test").get();
 
         mockMvc.perform(get("/projects")).andExpect(status().isOk());
-        mockMvc.perform(post("/api/projects/?projectName=test")).andExpect(status().isOk());
+        mockMvc.perform(post("/api/projects/?projectName=test&templateId=")).andExpect(status().isOk());
 
         projId = projectRepository.findAll()
                 .stream()
@@ -159,13 +149,7 @@ public class Tests {
     {
         // Очистка файловой системы от созданных файлов тестового проекта
         if (projId != null) {
-            try (Stream<Path> paths = Files.walk(Paths.get("projects/" + projId))) {
-                paths.sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            FileUtils.deleteDir(Paths.get("projects/" + projId));
         }
     }
 

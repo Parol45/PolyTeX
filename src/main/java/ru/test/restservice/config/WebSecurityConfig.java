@@ -32,10 +32,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                // TODO: админка
-                //.antMatchers("/h2-console", "/admin/**").hasAnyRole("ADMIN")
-                //.and()
-                //.authorizeRequests()
+                .antMatchers("/h2-console/**", "/admin/**", "/actuator/**", "/swagger-ui**",
+                        "/v2/api-docs/**").hasAnyRole("ADMIN")
+                .and()
+                .authorizeRequests()
 
                 .antMatchers("/api/**", "/projects/**").hasAnyRole("USER", "ADMIN")
                 .and()

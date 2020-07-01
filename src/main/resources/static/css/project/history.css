@@ -1,0 +1,42 @@
+button, a {
+    margin-left: 0;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: row;
+    height: 93%;
+}
+
+.flex-container .main-panel {
+    background-color: whitesmoke;
+}
+
+.main-panel {
+    overflow: auto;
+    border-right: 1px solid black;
+}
+
+select {
+    width: 150px;
+    margin-right: 0;
+    padding-right: 0;
+}
+
+#current-doc {
+    width: 67%;
+}
+
+#commit-list {
+    width: 33%;
+    display: flex;
+    flex-direction: column;
+    align-items: center
+}
+
+.control-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0px;
+}

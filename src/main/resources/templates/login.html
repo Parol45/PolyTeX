@@ -2,23 +2,86 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" type="image/png" href="../static/favicon.ico" th:href="@{favicon.ico}">
-    <link rel="icon" type="image/png" href="../static/favicon.ico" th:href="@{favicon.ico}">
-    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/login.css" th:href="@{/css/login.css}">
+    <link rel="stylesheet" type="text/css" href="../static/css/footer.css" th:href="@{/css/footer.css}">
+    <link rel="icon" type="image/png" sizes="32x32" href="../static/favicon-32x32.png" th:href="@{/favicon-32x32.png}">
+    <link rel="icon" type="image/png" sizes="16x16" href="../static/favicon-16x16.png" th:href="@{/favicon-16x16.png}">
+    <link rel="shortcut icon" type="image/png" href="../static/favicon-32x32.png" th:href="@{/favicon-32x32.png}">
+    <title>Войти - LaTeX for Polytech</title>
 </head>
-<body>
-<form id="login-form" method="post" action="/login">
-    <input type="text" autocomplete="email" name="email" placeholder="Почта" required>
-    <br>
-    <input type="password" autocomplete="password" name="password" placeholder="Пароль" required>
-    <br>
-    <input type="submit" value="Login"></li>
-    <br>
-</form>
-<a href="/registration">Register</a>
-<br>
-<a href="/oauth2/authorization/spbstu">Log via spbstu</a>
-<br>
-<div th:text="${error}"></div>
+<body ng-app="app" ng-controller="ctrl">
+
+<div class="main">
+    <h2>PolyTeX - LaTeX Editor</h2>
+    <div class="container right-panel-active" id="container">
+        <div class="form-container sign-up-container">
+            <form id="login-form" method="post" action="/login">
+                <h1>Войти</h1>
+                <span>используя локальную уч. запись</span>
+                <input id="email-field" type="text" autocomplete="email" name="email" placeholder="Логин" required>
+                <input id="password-field" type="password" autocomplete="password" name="password" placeholder="Пароль"
+                       required>
+                <button>Вход</button>
+                <div class="error" th:text="${error}"></div>
+            </form>
+        </div>
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1>Войти</h1>
+                    <p>используя единую запись СПБПУ</p>
+                    <button class="ghost" onclick="location.href='/oauth2/authorization/spbstu'">
+                        <div>
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyOS43ODEiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCA1Ny43ODEgNTgiPiAgPGRlZnM+ICAgIDxzdHlsZT4gICAgICAuY2xzLTEgeyAgICAgICAgZmlsbDogI2QyZDJkMjsgICAgICAgIGZpbGwtcnVsZTogZXZlbm9kZDsgICAgICB9ICAgIDwvc3R5bGU+ICA8L2RlZnM+ICA8cGF0aCBpZD0icG9seS1sb2dvLnN2ZyIgY2xhc3M9ImNscy0xIiBkPSJNMTQ2LjIsNjcuNTIyYzEuMywwLjU0OCwzLjUxOCwzLjgzOCwzLjAyNSw3LjQzMmExOC4zMTMsMTguMzEzLDAsMCwxLTguNDU3LDMuODM4VjEwMS43aDguNjQxYzAsMy41MzItLjU1NSw2LjMzNS0xLjE3Miw3LjM3MWgtMTUuOFY3OS4xNTdIMTIxLjQ0NVY5Ny4wMDZjMCw5LjAxNi01LjEyNCwxMy40LTExLjY2NiwxMy40YTIyLjM1NCwyMi4zNTQsMCwwLDEtNS45MjUtLjc5MmMtMC44NjUtMS4xNTctMS4zLTQuNjMtMS40Mi04Ljk1NSw0LjMyMSwyLjA3MSwxMC4yNDYsMy4wNDYsMTAuNzQtMy42NTVWODAuMzE1Yy02LjYwNS42Ny05LjAxMiw1LjIzOS0xMS4zLDguMjg1LDAuMDYxLTQuMDgyLjI0Ny03LjgsMC40OTMtMTAuMyw0LjUwNi00LjgxMiw5LjU2OC03LjA2NiwxOS41NjgtNy4wNjZIMTM2LjJhMTUuNTgsMTUuNTgsMCwwLDAsMTAtMy43MTZNMTI1Ljg4OSw2MWMtMTIuODM5LDAtMTguMDI0Ljc5Mi0xOC4wMjQsMC43OTItNS40OTQuMjQzLTkuMzgyLDMuOTU5LTkuOTM4LDEwLjI5NCwwLDAtLjkyNiw4LjI4NC0wLjkyNiwxNy45MXMwLjkyNiwxNy45MS45MjYsMTcuOTFjMC41NTUsNi4zMzUsNC40NDQsMTAuMTEyLDkuOTM4LDEwLjMsMCwwLDUuMTg2Ljc5MywxOC4wMjUsMC43OTNzMTguMDI0LS43OTMsMTguMDI0LTAuNzkzYzUuNDkzLS4yNDQsOS4zODMtMy45NTksOS45MzgtMTAuM0ExNzMuMjcyLDE3My4yNzIsMCwwLDAsMTU0Ljc3OCw5MGMwLTkuNTY0LS45MjYtMTcuOTEtMC45MjYtMTcuOTEtMC41NTUtNi4zMzUtNC40NDQtMTAuMTEyLTkuOTM4LTEwLjMsMC0uMDYxLTUuMTg2LTAuNzkxLTE4LjAyNS0wLjc5MSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTk3IC02MSkiLz48L3N2Zz4=">
+                            Вход
+                        </div>
+                    </button>
+                    <a target="_blank" href="https://open.spbstu.ru/usid/">Как получить логин и пароль?</a>
+                    <div class="error" th:text="${banned}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-container">
+        <div class="column left">
+            <a href="http://www.spbstu.ru" target="_blank">
+                <img alt="СПбПУ" src="https://icst.spbstu.ru/userfiles/images/branding/poly-logo.svg">
+            </a>
+            <a href="https://icst.spbstu.ru/">
+                <img alt="Институт компьютерных наук и технологий"
+                     src="https://icst.spbstu.ru/userfiles/images/branding/inst-logo-footer.svg">
+            </a>
+            <br>
+            <br>
+            Институт компьютерных наук и технологий
+        </div>
+        <div class="column right">
+            <ul>
+                <li>
+                    <h2>Контакты</h2>
+                </li>
+                <li>
+                    9-й учебный корпус, ул. Политехническая, дом 21, Санкт-Петербург, 194021
+                </li>
+                <li>
+                    +7 (812) 297 16 28 (приёмная директора); +7 (812) 297 16 47 (деканат)
+                </li>
+                <li>
+                    Vladimir.Parkhomenko@spbstu.ru
+                </li>
+                <li>
+                    office@icc.spbstu.ru
+                </li>
+                <li>
+                    Разработчики: Д.С. Шафранов, В.А. Пархоменко
+                </li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
 </body>
 </html>

@@ -19,8 +19,8 @@ spring:
         web-allow-others: true
   servlet:
     multipart:
-      max-file-size: 25MB
-      max-request-size: 25MB
+      max-file-size: 10MB
+      max-request-size: 10MB
   security:
     oauth2:
       client:
@@ -36,3 +36,15 @@ spring:
             #client-secret: *************************************
             authorization-grant-type: authorization_code
             redirect-uri: https://latex.icst.spbstu.ru/callback
+
+admin:
+  idle-timeout: 1 # in minutes
+  max-project-count: 10
+  compilation-interval: 10 # in seconds
+  max-path-length: 100
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env,health,info,scheduledtasks,sessions,heapdump

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.test.restservice.config.OAuth2Properties;
 import ru.test.restservice.dao.UserRepository;
 import ru.test.restservice.entity.User;
+import ru.test.restservice.exceptions.GenericException;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,6 +19,7 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class OAuth2Service {
         }
     }
 
-    public String getUserInfo(String code){
+    public boolean getUserInfo(String code){
         try {
             String accessToken = sendRequest("https://cas.spbstu.ru/oauth2.0/accessToken?" +
                     "grant_type=authorization_code" +
@@ -67,17 +69,25 @@ public class OAuth2Service {
 
             String username = userParams.get("sAMAccountName").toString();
 
-            if (!userRepository.findByEmail(username).isPresent()) {
-                userRepository.save(new User(username, ""));
+            User user;
+            Optional<User> mbUser = userRepository.findByEmail(username);
+            if (mbUser.isPresent()) {
+                user = mbUser.get();
+            } else {
+                user = new User(username, "", "ROLE_USER", false);
+                userRepository.save(user);
             }
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(username, "", Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            return userInfo;
+            if (!user.banned) {
+                Authentication authentication = new UsernamePasswordAuthenticationToken(username, "", Collections.singleton(new SimpleGrantedAuthority(user.role)));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                return true;
+            } else {
+                return false;
+            }
 
         } catch (Exception er) {
-            return er.getMessage();
+            throw new GenericException(er.getMessage());
         }
     }
 }

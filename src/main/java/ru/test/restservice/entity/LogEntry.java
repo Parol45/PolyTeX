@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class LogEntry {
     @Id
-    public String id;
+    public UUID id;
 
     @Column(nullable = false)
     public UUID userId;

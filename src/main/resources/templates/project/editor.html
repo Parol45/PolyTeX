@@ -2,57 +2,83 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Diplom</title>
-    <link rel="stylesheet" type="text/css" href="../../static/project/editor.css" th:href="@{/project/editor.css}">
-    <link rel="shortcut icon" type="image/png" href="../../static/favicon.ico" th:href="@{/favicon.ico}">
-    <link rel="icon" type="image/png" href="../../static/favicon.ico" th:href="@{/favicon.ico}">
+    <link rel="stylesheet" type="text/css" href="../../static/css/shared.css" th:href="@{/css/shared.css}">
+    <link rel="stylesheet" type="text/css" href="../../static/css/project/editor.css"
+          th:href="@{/css/project/editor.css}">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png"
+          th:href="@{/favicon-32x32.png}">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png"
+          th:href="@{/favicon-16x16.png}">
+    <link rel="shortcut icon" type="image/png" href="../../static/favicon-32x32.png" th:href="@{/favicon-32x32.png}">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
-    <script src="../../static/project/editor.js" th:src="@{/project/editor.js}"></script>
+    <script src="../../static/js/project/editor.js" th:src="@{/js/project/editor.js}"></script>
     <script th:inline="javascript">/*<![CDATA[*/
     var projectId = /*[[${projectId}]]*/ 'default'; /*]]>*/
     var filesChanged = false;
     </script>
+    <title>PolyTeX - LaTeX Editor</title>
 </head>
 
 <body ng-app="app" ng-controller="ctrl">
 
-<header>
-    <h1>Latex editor</h1>
-    <button class="compile-butt" ng-click="sendForCompilation()">Compile</button>
-    <button class="save-butt" ng-click="saveDocs()">Save files</button>
-    <form id="logout-form" method="post" action="/logout">
-        <button type="submit">Logout</button>
-    </form>
-    <button class="clear-butt" ng-click="clearAux()">Clear aux files</button>
-    <a th:href="@{/projects/{id}/history(id=${projectId})}">to history</a>
-    <a href="/projects" style="margin-left: 20px">to projects</a>
-</header>
+<div class="main">
+    <div class="main-container">
+        <header>
+            <div class="container">
+                <b class="unselectable-text"><img alt="ИКНТ"
+                                                  class="logo"
+                                                  src="https://dl.spbstu.ru/pluginfile.php/1/core_admin/logocompact/0x70/1590582551/logo_iknt.png">PolyTeX
+                    - LaTeX Editor</b>
+                <nav class="main-nav">
+                    <ul class="main-nav-list">
+                        <li>
+                            <a href="history">К истории изменения проекта</a>
+                        </li>
+                        <li>
+                            <a href="/projects">Вернуться на главную</a>
+                        </li>
+                        <li>
+                            <a href="/logout">Выйти из системы</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
 
-<div class="flex-container">
-    <div class="main-panel" id="file-list">
-        <input id="upload-file" type="file" onchange="angular.element(this).scope().uploadFile(this.files[0])"
-               hidden="true">
-        <label for="upload-file" id="upload-butt">Upload file</label>
+        <div class="flex-container">
+            <div class="main-panel" id="left-panel">
+                <div class="main-content">
+                    <button class="control-butt" id="compile-butt" ng-click="sendForCompilation()">Компиляция</button>
+                    <button class="control-butt" id="save-butt" ng-click="saveDocs()">Сохранить файлы</button>
+                    <button class="control-butt" id="clear-butt" ng-click="clearAux()">Удалить aux-файлы</button>
+                    <input hidden="true" id="upload-file" max="9999" min="1" multiple="true"
+                           onchange="angular.element(this).scope().uploadFiles(this.files)"
+                           type="file">
+                    <label class="unselectable-text" for="upload-file" id="upload-butt">Загрузить файлы</label>
 
-        <input type="text" id="new-file" placeholder="File name">
-        <button class="new-file-butt" ng-click="createItem('file')">Create</button>
+                    <input id="new-file" placeholder="Имя нового файла" type="text">
+                    <button class="control-butt" id="new-file-butt" ng-click="createItem('file')">Создать</button>
 
-        <input type="text" id="new-folder" placeholder="Folder name">
-        <button class="new-folder-butt" ng-click="createItem('dir')">Create</button>
+                    <input id="new-folder" placeholder="Имя новой папки" type="text">
+                    <button class="control-butt" id="new-folder-butt" ng-click="createItem('dir')">Создать</button>
 
-        <div id="file-list-wrap"></div>
-    </div>
+                    <div id="file-list-wrap"></div>
+                </div>
+                <footer>
+                    <a href ng-click="archiveProject()">Скачать проект архивом</a>
+                </footer>
+            </div>
 
-    <div class="main-panel" id="source-wrap" contenteditable
-         onblur="angular.element(this).scope().saveOpenedDocLocally()"
-         onkeydown="filesChanged = true">
-    </div>
+            <div class="main-panel" id="source-wrap" contenteditable
+                 onblur="angular.element(this).scope().saveOpenedDocLocally()"
+                 onkeydown="filesChanged = true">
+            </div>
 
-    <div class="main-panel" id="result-wrap">
+            <div class="main-panel" id="result-wrap">
 
+            </div>
+        </div>
     </div>
 </div>
-
 </body>
-
 </html>

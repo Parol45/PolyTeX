@@ -5,18 +5,12 @@ Web-based LaTeX compiler/interpreter
 
 ## Backend:
 
-1. Block simultaneous work on a project
-2. Add admin page (with resource limitations)
-3. Add different rights on project to user
-4. Add russian interface translation
-5. Note authenticated user as git commit author
-6. Public link to pdf
-7. Add documentation or comments to code
+1. Add documentation or comments to code.
 
 ## Frontend:
 
-1. Diffs library
+1. Tab with latex error.
 2. Add line numbers.
-3. LaTeX to Richtext conversion
+3. LaTeX to Richtext conversion.
 4. Add WYSIWYG formulae, pictures and tables insertion.
-5. Make it look more smooth
+5. Make it look more smooth.

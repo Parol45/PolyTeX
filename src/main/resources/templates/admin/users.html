@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../../static/css/shared.css" th:href="@{/css/shared.css}">
+    <link rel="stylesheet" type="text/css" href="../../static/css/baldej-table.css"
+          th:href="@{/css/baldej-table.css}">
+    <link rel="stylesheet" type="text/css" href="../static/css/footer.css" th:href="@{/css/footer.css}">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png"
+          th:href="@{/favicon-32x32.png}">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png"
+          th:href="@{/favicon-16x16.png}">
+    <link rel="shortcut icon" type="image/png" href="../../static/favicon-32x32.png" th:href="@{/favicon-32x32.png}">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
+    <script src="../../static/js/admin/users.js" th:src="@{/js/admin/users.js}"></script>
+    <script th:inline="javascript">/*<![CDATA[*/
+    var users = /*[[${users}]]*/ 'default' </script>
+    <title>Пользователи</title>
+</head>
+<body ng-app="app" ng-controller="ctrl">
+<div class="main">
+    <header>
+        <div class="container">
+            <b class="unselectable-text"><img alt="ИКНТ"
+                                              class="logo"
+                                              src="https://dl.spbstu.ru/pluginfile.php/1/core_admin/logocompact/0x70/1590582551/logo_iknt.png">PolyTeX
+                - LaTeX Editor</b>
+            <nav class="main-nav">
+                <ul class="main-nav-list">
+                    <li>
+                        <a href="/projects">Вернуться на главную</a>
+                    </li>
+                    <li>
+                        <a href="/admin/projects">Проекты</a>
+                    </li>
+                    <li>
+                        <a href="#">Пользователи</a>
+                    </li>
+                    <li>
+                        <a href="/admin/templates">Шаблоны</a>
+                    </li>
+                    <li>
+                        <a href="/admin/settings">Настройки</a>
+                    </li>
+                    <li>
+                        <a target="_blank" href="/h2-console">Консоль БД</a>
+                    </li>
+                    <li>
+                        <a target="_blank" href="/swagger-ui.html">Документация</a>
+                    </li>
+                    <li>
+                        <a href="#">Actuator</a>
+                        <ul class="submenu">
+                            <li><a target="_blank" href="/actuator/env">env</a></li>
+                            <li><a target="_blank" href="/actuator/health">health</a></li>
+                            <li><a target="_blank" href="/actuator/info">info</a></li>
+                            <li><a target="_blank" href="/actuator/scheduledtasks">scheduledtasks</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+
+    <div class="list">
+        <table class="simple-little-table" cellspacing='0'>
+            <caption>
+                <b style="font-size: large;">Пользователи в системе</b>
+                <br>
+                <input id="email-field" placeholder="Логин">
+                <br>
+                <input id="password-field" type="password" placeholder="Пароль">
+                <br>
+                <button ng-click="register()">Зарегистрировать</button>
+                <br>
+                <input placeholder="Поиск по имени" ng-model="search">
+            </caption>
+            <tr>
+                <td>id</td>
+                <td>Имя</td>
+                <td>Роль в системе</td>
+                <td>Заблокирован?</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr ng-attr-id="{{template.id}}" ng-repeat="user in users | filter:{email:search}">
+                <td>{{user.id}}</td>
+                <td>{{user.email}}</td>
+                <td>{{user.role}}</td>
+                <td ng-if="user.banned">Да</td>
+                <td ng-if="!user.banned">Нет</td>
+                <td ng-if="user.role === 'ROLE_USER'">
+                    <button ng-click="grantAdmin(user.id)">Повысить до админа</button>
+                </td>
+                <td ng-if="user.role === 'ROLE_ADMIN'">
+                    <button ng-click="revokeAdmin(user.id)">Понизить до пользователя</button>
+                </td>
+                <td ng-if="!user.banned">
+                    <button ng-click="block(user.id)">Заблокировать</button>
+                </td>
+                <td ng-if="user.banned">
+                    <button ng-click="unblock(user.id)">Разблокировать</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<footer>
+    <div class="footer-container">
+        <div class="column left">
+            <a href="http://www.spbstu.ru" target="_blank">
+                <img alt="СПбПУ" src="https://icst.spbstu.ru/userfiles/images/branding/poly-logo.svg">
+            </a>
+            <a href="https://icst.spbstu.ru/">
+                <img alt="Институт компьютерных наук и технологий"
+                     src="https://icst.spbstu.ru/userfiles/images/branding/inst-logo-footer.svg">
+            </a>
+            <br>
+            <br>
+            Институт компьютерных наук и технологий
+        </div>
+        <div class="column right">
+            <ul>
+                <li>
+                    <h2>Контакты</h2>
+                </li>
+                <li>
+                    9-й учебный корпус, ул. Политехническая, дом 21, Санкт-Петербург, 194021
+                </li>
+                <li>
+                    +7 (812) 297 16 28 (приёмная директора); +7 (812) 297 16 47 (деканат)
+                </li>
+                <li>
+                    Vladimir.Parkhomenko@spbstu.ru
+                </li>
+                <li>
+                    office@icc.spbstu.ru
+                </li>
+                <li>
+                    Разработчики: Д.С. Шафранов, В.А. Пархоменко
+                </li>
+            </ul>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

@@ -10,10 +10,15 @@ import ru.test.restservice.dto.FileItemDTO;
 import ru.test.restservice.service.FileService;
 import ru.test.restservice.service.GitService;
 import ru.test.restservice.service.LogService;
+import ru.test.restservice.service.ProjectService;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
+
+import static ru.test.restservice.utils.FileUtils.packZip;
 
 
 @RestController
@@ -21,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FileApiController {
 
+    private final ProjectService projectService;
     private final FileService fileService;
     private final GitService gitService;
     private final LogService logService;
@@ -31,6 +37,7 @@ public class FileApiController {
     @PostMapping(value = "/projects/{projectId}/upload", headers = "content-type=multipart/*")
     public FileItemDTO handleFileUpload(@PathVariable UUID projectId, @RequestParam("file") MultipartFile file, @RequestParam("path") String path, Authentication auth) throws IOException {
         logService.log(auth.getName(), projectId, String.format("User %s has uploaded file %s", auth.getName(), path));
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
         return fileService.save(file, path, projectId);
     }
 
@@ -40,13 +47,21 @@ public class FileApiController {
      * @return Список объектов-файлов: имя, тип и содержимое
      */
     @GetMapping("/projects/{projectId}/files")
-    public List<FileItemDTO> returnFileList(@PathVariable UUID projectId) throws IOException {
+    public List<FileItemDTO> returnFileList(@PathVariable UUID projectId, Authentication auth) throws IOException {
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
         return fileService.listFiles(projectId);
     }
 
-    @PostMapping("/projects/{projectId}/commit-files")
-    public List<String> returnCommitFileList(@PathVariable UUID projectId, @RequestBody List<String> fileIds) throws IOException {
-        return gitService.getCommitFilesList(projectId, fileIds);
+    @GetMapping("/projects/{projectId}/get-file")
+    public List<String> returnFileContent(@PathVariable UUID projectId, @RequestParam String filepath, Authentication auth) throws IOException {
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
+        return Files.readAllLines( Paths.get( "projects/" + projectId + "/" + filepath.substring(1)));
+    }
+
+    @GetMapping("/projects/{projectId}/commit-file")
+    public FileItemDTO returnCommitFile(@PathVariable UUID projectId, @RequestParam String fileId, Authentication auth) throws IOException {
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
+        return new FileItemDTO(null, null, gitService.getCommitFile(projectId, fileId), null);
     }
 
     /**
@@ -55,18 +70,41 @@ public class FileApiController {
     @PutMapping("/projects/{projectId}/files")
     public void saveFiles(@PathVariable UUID projectId, @RequestBody List<FileItemDTO> files, Authentication auth) throws IOException {
         logService.log(auth.getName(), projectId, String.format("User %s saved file changes", auth.getName()));
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
         fileService.rewriteFiles(files, projectId);
     }
 
     @DeleteMapping("/projects/{projectId}/files")
-    public void deleteFile(@PathVariable UUID projectId, @RequestParam String path, Authentication auth) throws IOException {
+    public void deleteFile(@PathVariable UUID projectId, @RequestParam String path, Authentication auth) throws IOException, GitAPIException {
         logService.log(auth.getName(), projectId, String.format("User %s has deleted file %s", auth.getName(), path));
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
         fileService.deleteFile(path, projectId);
     }
 
-    @PostMapping("/projects/{projectId}/rollback/")
+    @PostMapping("/projects/{projectId}/rollback")
     public void rollback(@PathVariable UUID projectId, @RequestBody CommitDTO.File file, @RequestParam String commitDate, Authentication auth) throws IOException, GitAPIException {
-        logService.log(auth.getName(), projectId, String.format("User %s rolled back file %s to %s", auth.getName(), file.name, commitDate));
-        gitService.rollback(projectId, file, commitDate);
+        logService.log(auth.getName(), projectId, String.format("User %s rolled back file %s to %s", auth.getName(), file.path, commitDate));
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
+        fileService.rewriteFiles(gitService.rollback(projectId, file, commitDate, auth.getName()), projectId);
+    }
+
+    @PostMapping("/projects/{projectId}/commit")
+    public void commit(@PathVariable UUID projectId, Authentication auth) throws IOException, GitAPIException {
+        logService.log(auth.getName(), projectId, String.format("User %s has committed project %s", auth.getName(), projectId));
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
+        projectService.performCommit(projectId, auth.getName());
+    }
+
+    @GetMapping("/projects/{projectId}/clear-aux")
+    public void clearAuxFiles(@PathVariable UUID projectId, Authentication auth) throws IOException {
+        logService.log(auth.getName(), projectId, String.format("User %s deleted aux files from %s project", auth.getName(), projectId));
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
+        fileService.clearAuxFiles(projectId);
+    }
+
+    @GetMapping("/projects/{projectId}/archive-project")
+    public void archiveProject(@PathVariable UUID projectId, Authentication auth) throws IOException {
+        projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
+        packZip(projectId);
     }
 }

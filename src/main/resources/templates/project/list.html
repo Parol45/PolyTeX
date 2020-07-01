@@ -2,49 +2,163 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" type="image/png" href="../../static/favicon.ico" th:href="@{favicon.ico}">
-    <link rel="icon" type="image/png" href="../../static/favicon.ico" th:href="@{favicon.ico}">
+    <link rel="stylesheet" type="text/css" href="../../static/css/shared.css" th:href="@{/css/shared.css}">
+    <link rel="stylesheet" type="text/css" href="../../static/css/baldej-table.css"
+          th:href="@{/css/baldej-table.css}">
+    <link rel="stylesheet" type="text/css" href="../static/css/footer.css" th:href="@{/css/footer.css}">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png"
+          th:href="@{/favicon-32x32.png}">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png"
+          th:href="@{/favicon-16x16.png}">
+    <link rel="shortcut icon" type="image/png" href="../../static/favicon-32x32.png" th:href="@{/favicon-32x32.png}">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.9/angular.min.js"></script>
-    <script src="../../static/project/list.js" th:src="@{/project/list.js}"></script>
+    <script src="../../static/js/project/list.js" th:src="@{/js/project/list.js}"></script>
     <script th:inline="javascript">/*<![CDATA[*/
-    var projects = /*[[${projects}]]*/ 'default', email = /*[[${userEmail}]]*/ 'default'</script>
-    <title>Your projects</title>
+    var projects = /*[[${projects}]]*/ 'default', templates = /*[[${templates}]]*/ 'default',
+        username = /*[[${userEmail}]]*/ 'default', admin = /*[[${admin}]]*/ 'default' </script>
+    <title>Мои проекты</title>
 </head>
 <body ng-app="app" ng-controller="ctrl">
+<div class="main">
+    <header>
+        <div class="container">
+            <b class="unselectable-text"><img alt="ИКНТ"
+                                              class="logo"
+                                              src="https://dl.spbstu.ru/pluginfile.php/1/core_admin/logocompact/0x70/1590582551/logo_iknt.png">PolyTeX - LaTeX Editor</b>
+            <nav class="main-nav">
+                <ul class="main-nav-list">
+                    <li>
+                        <a data-ng-if="isAdmin" href="/admin/users">На страницу администратора</a>
+                    </li>
+                    <li>
+                        <a href="/logout">Выйти из системы</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-<input type="text" id="projectName" placeholder="Имя проекта">
-<input type="submit" value="Создать" ng-click="createNewProject()">
+    <div class="list">
+        <table id="project-list" class="simple-little-table" cellspacing='0'>
+            <caption class="container">
+                <input checked id="new" ng-model="type" type="radio" value="templ">
+                <label for="new"><b style="font-size: large;">Создать новый проект</b></label> <br>
+                <input id="upload" ng-model="type" type="radio" value="upload">
+                <label for="upload"><b style="font-size: large;">Создать проект на основе существующего</b></label>
 
-<form id="logout-form" method="post" action="/logout">
-    <button type="submit">Logout</button>
-</form>
+                <nav class="main-nav">
+                    <ul class="main-nav-list">
+                        <li>
+                            <input id="project-name" placeholder="Имя проекта" type="text">
+                        </li>
+                        <li>
+                            <select data-ng-if="type === 'templ'" id="template-select">
+                                <option id="null-template" value="" selected>Без шаблона</option>
+                                <option ng-attr-value="{{template.id}}" ng-repeat="template in templates"
+                                        ng-attr-title="{{template.description}}">
+                                    {{template.name}}
+                                </option>
+                            </select>
 
-<br>
+                            <br data-ng-if="type === 'upload'">
+                            <label data-ng-if="type === 'upload'" for="upload-file">Zip-архив с проектом:</label>
+                            <input data-ng-if="type === 'upload'" id="upload-file" type="file">
+                        </li>
+                        <li>
+                            <input data-ng-if="type === 'templ'" ng-click="createNewProject()" type="submit"
+                                   value="Создать">
 
-<table border="1">
-    <tr>
-        <td>id</td>
-        <td>Имя</td>
-        <td>Владельцы</td>
-        <td>Добавить владельца</td>
-        <td>Убрать владельца</td>
-    </tr>
-    <tr ng-attr-id="project.id" ng-repeat="project in projects">
-        <td>{{project.id}}</td>
-        <td><a ng-attr-href="{{'/projects/' + project.id + '/'}}">{{project.name}}</a></td>
-        <td>{{project.owners}}</td>
-        <td>
-            <input type="text" ng-attr-id="{{'add-' + project.id}}" placeholder="email">
-            <button type="submit" ng-click="addOwner(project.id)">Add</button>
-        </td>
-        <td>
-            <select ng-attr-id="{{'del-' + project.id}}">
-                <option ng-repeat="email in project.owners">{{email}}</option>
-            </select>
-            <button type="submit" ng-click="deleteOwner(project.id)">Remove</button>
-        </td>
-    </tr>
-</table>
+                            <br data-ng-if="type === 'upload'">
+                            <input data-ng-if="type === 'upload'" ng-click="uploadProject()" type="submit"
+                                   value="Создать">
+                        </li>
+                    </ul>
+                </nav>
+            </caption>
 
+            <tr>
+                <td class="unselectable-text">Имя</td>
+                <td class="unselectable-text">Свободен?</td>
+                <td class="unselectable-text">Владельцы</td>
+                <td class="unselectable-text">Добавить владельца</td>
+                <td class="unselectable-text">Управление проектом</td>
+            </tr>
+            <tr ng-attr-id="{{project.id}}" ng-repeat="project in projects">
+                <td>
+                    <a data-ng-if="!project.busy"
+                       ng-attr-href="{{'/projects/' + project.id + '/'}}">{{project.name}}</a>
+                    <div data-ng-if="project.busy" class="unselectable-text">{{project.name}}</div>
+                </td>
+                <td>
+                    <div data-ng-if="!project.busy" class="unselectable-text" style="color: #419B5F">Да</div>
+                    <div data-ng-if="project.busy" class="unselectable-text" style="color: #DC143C">Нет</div>
+                </td>
+                <td class="unselectable-text">
+                    <ul>
+                        <li ng-repeat="owner in project.owners">
+                            {{owner}}
+                        </li>
+                    </ul>
+                </td>
+                <td>
+                    <input ng-attr-id="{{'add-' + project.id}}" placeholder="Имя пользователя" type="text">
+                    <button type="submit" ng-click="addOwner(project.id)">Добавить</button>
+                </td>
+                <td>
+                    <select ng-attr-id="{{'del-' + project.id}}" ng-if="project.creator">
+                        <option disabled id="null-file" selected value="">Выберите
+                            пользователя
+                        </option>
+                        <option ng-if="username != iUsername" ng-repeat="iUsername in project.owners">{{iUsername}}
+                        </option>
+                    </select>
+                    <button ng-if="project.creator" type="submit" ng-click="deleteOwner(project.id)">Убрать</button>
+                    <button ng-if="project.creator" type="submit" ng-click="deleteProject(project.id)">Удалить проект
+                    </button>
+                    <button ng-if="!project.creator" type="submit" ng-click="leaveProject(project.id)">Покинуть проект
+                    </button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<footer>
+    <div class="footer-container">
+        <div class="column left">
+            <a href="http://www.spbstu.ru" target="_blank">
+                <img alt="СПбПУ" src="https://icst.spbstu.ru/userfiles/images/branding/poly-logo.svg">
+            </a>
+            <a href="https://icst.spbstu.ru/">
+                <img alt="Институт компьютерных наук и технологий"
+                     src="https://icst.spbstu.ru/userfiles/images/branding/inst-logo-footer.svg">
+            </a>
+            <br>
+            <br>
+            Институт компьютерных наук и технологий
+        </div>
+        <div class="column right">
+        <ul>
+            <li>
+                <h2>Контакты</h2>
+            </li>
+            <li>
+                9-й учебный корпус, ул. Политехническая, дом 21, Санкт-Петербург, 194021
+            </li>
+            <li>
+                +7 (812) 297 16 28 (приёмная директора); +7 (812) 297 16 47 (деканат)
+            </li>
+            <li>
+                Vladimir.Parkhomenko@spbstu.ru
+            </li>
+            <li>
+                office@icc.spbstu.ru
+            </li>
+            <li>
+                Разработчики: Д.С. Шафранов, В.А. Пархоменко
+            </li>
+        </ul>
+        </div>
+    </div>
+</footer>
 </body>
 </html>

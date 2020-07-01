@@ -18,12 +18,17 @@ public class User {
 
     @Id
     @GeneratedValue
-    final private UUID user_id = null;
+    final private UUID id = null;
 
     @Column(nullable = false, unique = true)
     public String email;
 
     public String password;
+
+    @Column(nullable = false)
+    public String role;
+
+    public Boolean banned;
 
     @Override
     public String toString() {

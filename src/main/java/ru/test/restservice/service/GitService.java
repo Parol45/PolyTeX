@@ -33,19 +33,22 @@ import static ru.test.restservice.utils.FileUtils.isTextFile;
 public class GitService {
 
     private final ProjectRepository projectRepository;
-    private final FileService fileService;
 
     public void initRepository(String path) throws GitAPIException {
-
         Git git = Git.init().setDirectory(Paths.get(path).toFile()).call();
         git.add().addFilepattern(".").call();
-        git.commit().setMessage("Initial commit").call();
+        git.commit().setMessage("Initial commit").setAuthor("System", "System").call();
     }
 
-    public void commit(String path, String message) throws IOException, GitAPIException {
+    public void removeFile(String path, String pattern) throws IOException, GitAPIException {
+        Git git = Git.open(new File(path + "/.git"));
+        git.rm().addFilepattern(pattern).call();
+    }
+
+    public void commit(String path, String message, String username) throws IOException, GitAPIException {
         Git git = Git.open(new File(path + "/.git"));
         git.add().addFilepattern(".").call();
-        git.commit().setMessage(message).call();
+        git.commit().setMessage(message).setAuthor(username, username).call();
     }
 
     public List<CommitDTO> getCommitList(String path) throws IOException, GitAPIException {
@@ -69,12 +72,13 @@ public class GitService {
                    commitAuthor = commit.getAuthorIdent().getName(),
                    commitTitle = commit.getName();
             LocalDateTime commitDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(commit.getCommitTime() * 1000L), ZoneId.systemDefault());
-            result.add(new CommitDTO(commitId, commitDate, commitAuthor, commitTitle, files));
+            //TODO: формат даты
+            result.add(new CommitDTO(commitId, commitDate.toString(), commitAuthor, commitTitle, files));
         }
         return result;
     }
 
-    public StringBuilder getFileContents(String fileId, Repository repository) throws IOException {
+    public String getFileContents(String fileId, Repository repository) throws IOException {
         ObjectId objectId = ObjectId.fromString(fileId);
         ObjectLoader loader = repository.open(objectId);
         InputStream in = loader.openStream();
@@ -86,37 +90,30 @@ public class GitService {
                 textBuilder.append((char) c);
             }
         }
-        return textBuilder;
+        return textBuilder.toString();
     }
 
-    public List<String> getCommitFilesList(UUID projectId, List<String> fileIds) throws IOException {
+    public String getCommitFile(UUID projectId, String fileId) throws IOException {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         Git git = Git.open(new File(project.path + "/.git"));
         Repository repository = git.getRepository();
-        StringBuilder contents;
-        List<String> result = new ArrayList<>();
-        for (String fileId : fileIds) {
-            contents = getFileContents(fileId, repository);
-            result.add(contents.toString());
-        }
-        return result;
+        return getFileContents(fileId, repository);
     }
 
-    public void rollback(UUID projectId, CommitDTO.File file, String commitDate) throws IOException, GitAPIException {
+    public List<FileItemDTO> rollback(UUID projectId, CommitDTO.File file, String commitDate, String username) throws IOException, GitAPIException {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         Git git = Git.open(new File(project.path + "/.git"));
         Repository repository = git.getRepository();
-        commit(project.path, "Save before rollback to " + commitDate);
-        System.out.println("Save before rollback to " + commitDate);
-        Path fileToRollback = Paths.get(project.path + file.name);
-        StringBuilder contents = getFileContents(file.id, repository);
+        commit(project.path, "Save before rollback to " + commitDate, username);
+        Path fileToRollback = Paths.get(project.path + file.path);
+        String contents = getFileContents(file.id, repository);
         if (!Files.exists(fileToRollback)) {
             Files.createDirectories(fileToRollback.getParent());
         } else {
             Files.delete(fileToRollback);
         }
-        FileItemDTO newFile = new FileItemDTO(file.name, "txt", file.name, Arrays.asList(contents.toString().split("\n")));
-        fileService.rewriteFiles(Collections.singletonList(newFile), projectId);
+        FileItemDTO newFile = new FileItemDTO(file.path, "txt", file.path, Arrays.asList(contents.split("\n")));
+        return Collections.singletonList(newFile);
     }
 
 }
