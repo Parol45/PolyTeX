@@ -114,6 +114,7 @@ angular
             }
         };
 
+        // Загрузка одного файла
         $scope.uploadFile = function (file, parent, targetList) {
             let reg = /.(tex|bib|png|jpg|svg)$/i;
             let path = parent + "/" + file.name;
@@ -369,6 +370,7 @@ angular
             });
         };
 
+        // Формирование архива проекта и его загрузка
         $scope.archiveProject = function () {
             $http.get(`/api/projects/${projectId}/archive-project`).then(
                 () => {
@@ -396,8 +398,7 @@ angular
             }
         };
 
-
-        // Не работает минимум в яндекс браузере (и насрать в принципе)
+        // Сохранение изменений в файлах проекта при переадресации или закрытии вкладки
         window.addEventListener('beforeunload', function (e) {
             if (filesChanged) {
                 $scope.saveDocs();

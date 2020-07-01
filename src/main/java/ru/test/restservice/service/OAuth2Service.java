@@ -20,14 +20,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-
+/**
+ * Класс, завершающий авторизацию через OAuth
+ */
 @Service
 @RequiredArgsConstructor
 public class OAuth2Service {
 
     private final UserRepository userRepository;
     private final OAuth2Properties oAuth2Properties;
-
+    /**
+     * Метод, обращающийся к url CAS сервера
+     *
+     * @return JSON или html страницу
+     */
     // TODO: Feign
     public String sendRequest(String URL) {
         try {
@@ -53,6 +59,10 @@ public class OAuth2Service {
         }
     }
 
+    /**
+     * Получение информации о пользователе с CAS сервера
+     * (оставляю только имя, но там ещё прилично полей)
+     */
     public boolean getUserInfo(String code){
         try {
             String accessToken = sendRequest("https://cas.spbstu.ru/oauth2.0/accessToken?" +

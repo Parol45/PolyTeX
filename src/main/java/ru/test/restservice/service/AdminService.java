@@ -32,6 +32,13 @@ public class AdminService {
     private final UserRepository userRepository;
     private final LogService logService;
 
+    /**
+     * Метод, добавляющий в БД информацию о новом пользователе
+     *
+     * @param email имя пользователя
+     * @param password пароль пользователя
+     * @return новый созданный объект-сущность
+     */
     // TODO: обрабатывать нарушение уник индекса
     public User register(String email, String password) {
         User newUser = new User(email, new BCryptPasswordEncoder(4).encode(password), "ROLE_USER", false);
@@ -40,6 +47,11 @@ public class AdminService {
         return newUser;
     }
 
+    /**
+     * Метод, возвращающий системные настройки из объекта adminProperties
+     *
+     * @return новый созданный объект-сущность
+     */
     public Map<String, String> returnSettings() throws IOException {
         HashMap<String, String> settings = new HashMap<>();
         ArrayList<String> configLines = (ArrayList<String>) Files.readAllLines(Paths.get("config/application.yml"));
@@ -62,7 +74,11 @@ public class AdminService {
         }
     }
 
-    // Ничего умнее не придумал
+    /**
+     * Установка новых настроек в контекст приложения
+     *
+     * @param settings НАСТРОЙКИ
+     */
     public void setNewSettings(List<Setting> settings) throws IOException {
         ArrayList<String> configLines = (ArrayList<String>) Files.readAllLines(Paths.get("config/application.yml"));
         boolean needReload = false;
@@ -98,6 +114,9 @@ public class AdminService {
         Files.write(Paths.get("config/application.yml"), configLines);
     }
 
+    /**
+     * Вынесенный метод изменения строк конфиг-файлов
+     */
     private void rewriteConfigLines(List<String> configLines, String regexWhich, String regexFrom, String regexTo) {
         for (int i = 0; i < configLines.size(); i++) {
             if (configLines.get(i).matches(regexWhich)) {
@@ -106,6 +125,12 @@ public class AdminService {
         }
     }
 
+    /**
+     * Вроде очевидно:
+     *
+     * - добавление/удаление прав админа по id
+     * - блокирование/разблокирование пользователя по id
+     */
     public void grantAdmin(UUID id) {
         User user = userRepository.findById(id).orElseThrow(NotFoundException::new);
         user.role = "ROLE_ADMIN";
@@ -130,6 +155,14 @@ public class AdminService {
         userRepository.save(user);
     }
 
+    /**
+     * Добавление информации о новом шаблоне в БД и сохранение на диске
+     *
+     * @param templateName имя шаблона
+     * @param file zip-архив с файлами шаблона
+     * @param templateDescription описание шаблона
+     * @return новый созданный объект-сущность
+     */
     public Template createTemplate(String templateName, MultipartFile file, String templateDescription) throws IOException {
         UUID newId = UUID.randomUUID();
         Template temp = new Template(newId, templateName, templateDescription);
@@ -141,6 +174,9 @@ public class AdminService {
         return temp;
     }
 
+    /**
+     * Удаление шаблона по его id
+     */
     public void deleteTemplate(UUID templateId) {
         Template temp = templateRepository.findById(templateId).orElseThrow(NotFoundException::new);
         FileUtils.deleteDir(Paths.get("templates/" + temp.id));

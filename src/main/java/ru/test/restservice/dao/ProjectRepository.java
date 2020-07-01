@@ -6,6 +6,9 @@ import ru.test.restservice.entity.Project;
 
 import java.util.UUID;
 
+/**
+ * Класс-репозиторий для общения с БД
+ */
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
 }

@@ -10,6 +10,9 @@ import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+/**
+ * Сущность, хранимая в соответствующем репозитории
+ */
 @Data
 @Entity
 @NoArgsConstructor

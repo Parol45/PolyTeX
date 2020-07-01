@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Класс для передачи информации о проекте и конструктор на основе сущности из БД
+ */
 @Data
 @AllArgsConstructor
 public class ProjectDTO {

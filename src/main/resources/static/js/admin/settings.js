@@ -3,6 +3,7 @@ angular
     .controller("ctrl", ['$scope', '$http', function ($scope, $http) {
         $scope.settings = {...settings};
 
+        // Проверка правильности введённых настроек и их отправка на сервер
         $scope.sendSettings = function () {
             let sendSettings = [];
             let validProperties = true, reloaded = false;

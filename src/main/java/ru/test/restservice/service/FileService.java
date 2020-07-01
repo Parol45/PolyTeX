@@ -143,6 +143,9 @@ public class FileService {
         }
     }
 
+    /**
+     * Метод, удаляющий aux файлы в проекте
+     */
     public void clearAuxFiles(UUID projectId) throws IOException {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         Path projectDest = Paths.get(project.path);

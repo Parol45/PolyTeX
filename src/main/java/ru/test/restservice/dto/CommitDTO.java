@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Класс для передачи данных о контрольных точках между фронтом и бэком
+ */
 @Data
 @AllArgsConstructor
 public class CommitDTO {

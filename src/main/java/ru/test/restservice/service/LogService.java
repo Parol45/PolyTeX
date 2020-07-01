@@ -17,7 +17,9 @@ public class LogService {
 
     private final LogRepository logRepository;
     private final UserRepository userRepository;
-
+    /**
+     * Запись в БД действия пользователя
+     */
     public void log(String username, String action) {
         log(username,null, action);
     }

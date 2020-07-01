@@ -18,16 +18,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final ClientDetailsService userDetailsService;
 
+    /**
+     * Установка перегруженного объекта userDetailsService для локальной авторизации
+     */
     @Override
     protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
+    /**
+     * Установка шифровальщика паролей
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Установка доступа к urlам в зависимости от роли пользователя и настройка страниц аутентификации
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http

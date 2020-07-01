@@ -21,6 +21,11 @@ angular
             return date.replace(/(\d)(T)(\d)/g, "$1 $3");
         };
 
+        // Порядок выполнения функций следующий:
+        // 1) При выборе пользователем одного из коммитов: selectFirstVersion или selectSecondVersion
+        // 2) При выборе пользователем файла для сравнения: firstDownload -> secondDownload
+        // 3) formHtmlDiff
+
         $scope.selectFirstVersion = function (commitId) {
             rollbackButton.hidden = true;
             secondVersion.disabled = false;
@@ -52,11 +57,14 @@ angular
             currentFileArea.innerHTML = "";
         };
 
+        // Возможная загрузка файла из первого выпадающего меню
         $scope.firstDownload = function(filepath) {
             rollbackButton.hidden = firstVersion.value !== "cur";
             let file = $scope.firstVersionFiles.find(f => f.path === filepath);
             currentFileArea.innerHTML = "";
+            //
             if (file && !file.content) {
+                // Выбран один из коммитов или текущая версия проекта
                 if (firstVersion.value === "cur") {
                     $http.get(`/api/projects/${projectId}/get-file?filepath=${file.path}`).then((response) => {
                         file.content = response.data.join("\n");
@@ -73,6 +81,7 @@ angular
                     });
                 }
             } else {
+                // Если выбранного файла в коммите нет, то сравниваем с пустой строкой
                 if (file) {
                     $scope.secondDownload(file.content, filepath);
                 } else {
@@ -81,6 +90,7 @@ angular
             }
         };
 
+        // Возможная загрузка файла (если он ещё не загружен) из второго выпадающего меню
         $scope.secondDownload = function (firstText, filepath) {
             let oldFile = $scope.secondVersionFiles.find(file => file.path === filepath),
                 secondText = "";
@@ -106,6 +116,7 @@ angular
             }
         };
 
+        // Формирование стандартного html-элемента с разницей между файлами
         $scope.formHtmlDiff = function (secondText, firstText) {
             let sm = new difflib.SequenceMatcher(secondText, firstText);
             currentFileArea.appendChild(diffview.buildView({
@@ -119,6 +130,7 @@ angular
             }));
         };
 
+        // Возврат выбранного файла к состоянию старого коммита
         $scope.rollback = function () {
             if ($scope.selectedFile) {
                 let rollbackTime = commits.find(c => c.commitId === secondVersion.value.replace("string:", "")).commitTime;
@@ -139,6 +151,8 @@ angular
             }
         };
 
+        // Ручной коммит
+        // TODO: работает долго, потому что я там коммичу с add *
         $scope.commit = function () {
             $http.post(`/api/projects/${projectId}/commit`).then(() => {
                 document.location.reload(true);

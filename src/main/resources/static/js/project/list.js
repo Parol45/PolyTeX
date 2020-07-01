@@ -3,6 +3,7 @@ angular
     .controller("ctrl", ['$scope', '$http', function ($scope, $http) {
 
         let projectName = document.querySelector("#project-name");
+        // Отвечает за отображение типа создания проекта: шаблон/архив (templ/upload)
         $scope.type = "templ";
         $scope.projects = projects;
         $scope.username = username;

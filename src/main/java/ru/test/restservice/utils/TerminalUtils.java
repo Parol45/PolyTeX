@@ -7,6 +7,13 @@ import java.io.File;
 import java.io.InputStreamReader;
 
 public class TerminalUtils {
+    /**
+     * Метод, выполняющий команду в терминале вне зависимости от ОС
+     *
+     * @param command выполняемая команда
+     * @param pathToFile путь, где эта команда будет исполнена
+     * @return вывод вызванной команды в консольи
+     */
     public static String executeTerminalCommand(String command, String pathToFile) {
         StringBuilder messageBuilder = new StringBuilder();
         try {

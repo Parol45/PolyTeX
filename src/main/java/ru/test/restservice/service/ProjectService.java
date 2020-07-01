@@ -39,16 +39,14 @@ public class ProjectService {
 
     private final GitService gitService;
 
+    /**
+     * Список для учёта действий над проектами
+     */
     public Map<UUID, UserLastAccess> activeProjects = new HashMap<>();
 
-    @AllArgsConstructor
-    public static class UserLastAccess {
-        UUID userId;
-        LocalDateTime lastAccess;
-        LocalDateTime lastCompilation;
-    }
-
-    // Каждые 2 часа очищать ненужные записи, чтобы память не засорять
+    /**
+     * Запланированное задание по очистке списка действий над проектами (каждые 2 часа)
+     */
     @Scheduled(fixedRate = 7200000)
     public void activeProjectsCleanup() throws IOException, GitAPIException {
         for (UUID key : activeProjects.keySet()) {
@@ -64,6 +62,9 @@ public class ProjectService {
         }
     }
 
+    /**
+     * Проверка работает ли с проектом другой пользователь
+     */
     public boolean checkIfBusy(UUID projectId, UUID userId) {
         if (activeProjects.containsKey(projectId) && !userId.equals(activeProjects.get(projectId).userId)) {
             Duration duration = Duration.between(activeProjects.get(projectId).lastAccess, LocalDateTime.now());
@@ -74,6 +75,10 @@ public class ProjectService {
         }
     }
 
+    /**
+     * Проверка доступна ли компиляция для пользователя
+     * (для регулирования нагрузки на систему используется интервал между компиляциями)
+     */
     public boolean canCompile(User user) {
         for (UUID key : activeProjects.keySet()) {
             UserLastAccess ula = activeProjects.get(key);
@@ -88,8 +93,25 @@ public class ProjectService {
         return true;
     }
 
+    /**
+     * Обновление времени последнего действия над проектом в списке
+     */
     public void tryToRefreshLastAccessDate(UUID projectId, String username) {
         tryToRefreshLastAccessDate(projectId, username, false);
+    }
+
+    /**
+     * Возврат списка проектов, к которым пользователь имеет доступ
+     */
+    public List<ProjectDTO> listProjectsFor(String username) {
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(NotFoundException::new);
+        return projectRepository
+                .findAll()
+                .stream()
+                .filter(pr -> pr.owners.contains(user))
+                .map(pr -> new ProjectDTO(pr, checkIfBusy(pr.id, user.getId()), user.getId().equals(pr.creatorId), pr.creatorId, null))
+                .collect(Collectors.toList());
     }
 
     public void tryToRefreshLastAccessDate(UUID projectId, String username, boolean isCompiled) {
@@ -124,17 +146,9 @@ public class ProjectService {
         }
     }
 
-    public List<ProjectDTO> listProjectsFor(String username) {
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(NotFoundException::new);
-        return projectRepository
-                .findAll()
-                .stream()
-                .filter(pr -> pr.owners.contains(user))
-                .map(pr -> new ProjectDTO(pr, checkIfBusy(pr.id, user.getId()), user.getId().equals(pr.creatorId), pr.creatorId, null))
-                .collect(Collectors.toList());
-    }
-
+    /**
+     * Список всех проектов в системе
+     */
     public List<ProjectDTO> listAllProjects() {
         return projectRepository
                 .findAll()
@@ -143,7 +157,11 @@ public class ProjectService {
                 .collect(Collectors.toList());
     }
 
-    public ProjectDTO createNewProject(String projectName, UUID templateId, MultipartFile file, String email) throws IOException, GitAPIException, InterruptedException {
+    /**
+     * Создание нового проекта
+     */
+    public ProjectDTO createNewProject(String projectName, UUID templateId, MultipartFile file, String email) throws IOException, GitAPIException {
+        // TODO: Можно вынести как новую системную настройку
         if (projectName.length() > 50) {
             throw new GenericException("Имя проекта слишком длинное");
         }
@@ -154,11 +172,13 @@ public class ProjectService {
                 .stream()
                 .filter(pr -> pr.owners.contains(currentUser))
                 .count();
+        // проверка на максимальное кол-во проектов
         if (userProjectCount < adminProperties.maxProjectCount) {
             UUID newId = UUID.randomUUID();
             Project newProj = new Project(newId, projectName, "projects/" + newId, currentUser.getId(), Collections.singleton(currentUser));
             projectRepository.save(newProj);
             Files.createDirectories(Paths.get("projects/" + newId));
+            // проверка на создание проекта с помощью шаблона, загрузки архива или пустого
             if (templateId != null) {
                 templateRepository.findById(templateId).orElseThrow(NotFoundException::new);
                 FileUtils.copyContentTo("templates/" + templateId, "projects/" + newId);
@@ -176,10 +196,12 @@ public class ProjectService {
         }
     }
 
-    public Project getProjectForUser(UUID projectId, String email) {
-        return getProjectForUser(projectId, email, false);
-    }
-
+    /**
+     * Возврат сущности-проекта, если пользователь им владеет
+     *
+     * @param forced возвращает project даже если пользователь работает с проектом
+     *               (для панели администратора)
+     */
     public Project getProjectForUser(UUID projectId, String email, boolean forced) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(NotFoundException::new);
@@ -194,6 +216,13 @@ public class ProjectService {
         return project;
     }
 
+    public Project getProjectForUser(UUID projectId, String email) {
+        return getProjectForUser(projectId, email, false);
+    }
+
+    /**
+     * Добавление пользователя во владельцы проекта
+     */
     public void addOwner(UUID projectId, String email, String owner) {
         if (email.length() > 50) {
             throw new GenericException("Имя пользователя слишком длинное");
@@ -218,11 +247,16 @@ public class ProjectService {
         }
     }
 
+    /**
+     * Удаление пользователя из владельцев проекта
+     */
     public void removeOwner(UUID projectId, String email, String owner) {
         Project project = getProjectForUser(projectId, owner, true);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(NotFoundException::new);
-        if (project.owners.contains(user)) {
+        User userOwner = userRepository.findByEmail(owner)
+                .orElseThrow(NotFoundException::new);
+        if (project.owners.contains(user) && userOwner.getId().equals(project.creatorId)) {
             project.owners.remove(user);
             userRepository.save(user);
             projectRepository.save(project);
@@ -231,6 +265,9 @@ public class ProjectService {
         }
     }
 
+    /**
+     * Удаление проекта
+     */
     public void deleteProject(UUID projectId, String email) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(NotFoundException::new);
@@ -244,13 +281,29 @@ public class ProjectService {
         }
     }
 
+    /**
+     * Получение списка всех коммитов в репозитории проекта
+     */
     public List<CommitDTO> listCommits(UUID projectId, String email) throws IOException, GitAPIException {
         Project project = getProjectForUser(projectId, email);
         return gitService.getCommitList(project.path);
     }
 
+    /**
+     * Ручное создание контрольной точки
+     */
     public void performCommit(UUID projectId, String username) throws IOException, GitAPIException {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         gitService.commit(project.path, "Another test", username);
+    }
+
+    /**
+     * Класс для учёта действий над проектами
+     */
+    @AllArgsConstructor
+    public static class UserLastAccess {
+        UUID userId;
+        LocalDateTime lastAccess;
+        LocalDateTime lastCompilation;
     }
 }

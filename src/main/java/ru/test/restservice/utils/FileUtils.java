@@ -58,6 +58,11 @@ public class FileUtils {
         }
     }
 
+    /**
+     * Метод, распаковывающий zip-архив в ту же директорию
+     *
+     * @param zip - путь до zip-архива
+     */
     public static void unpackZip(Path zip) {
         try {
             ZipFile zipFile = new ZipFile(zip.toString());
@@ -78,6 +83,32 @@ public class FileUtils {
         }
     }
 
+    /**
+     * Метод, архивирующий папку с проетком
+     *
+     * @param projectId - id архивируемого проекта
+     */
+    public static void packZip(UUID projectId) throws IOException {
+        Path projectPath = Paths.get("projects/" + projectId);
+        ZipFile zipFile = new ZipFile(String.format("projects/%s/%s.zip", projectId, projectId));
+        try (Stream<Path> files = Files.list(projectPath)) {
+            files.forEach(f -> {
+                try {
+                    if (Files.isDirectory(f) && !f.toString().matches(".*" + projectId.toString() + "([\\\\/]\\.git.*)?")) {
+                        zipFile.addFolder(f.toFile());
+                    } else if (isAllowedFile(f.getFileName().toString())) {
+                        zipFile.addFile(f.toFile());
+                    }
+                } catch (ZipException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    /**
+     * Копирование всех файлов из одной директории в другую
+     */
     public static void copyContentTo(String from, String to) {
         String regex = "^" + Paths.get(from).toString().replace("\\", "\\\\") + "[\\\\/]?";
         try (Stream<Path> paths = Files.walk(Paths.get(from))) {
@@ -98,6 +129,10 @@ public class FileUtils {
         }
     }
 
+    /**
+     * Удаление папки с проектом
+     * (чтобы не возникало разных ошибок, связанных с незакрытыми стримами, удалять этим методом)
+     */
     public static void deleteProjectFromDisk(UUID projectId) {
         if (projectId != null) {
             try (Stream<Path> paths = Files.walk(Paths.get("projects/" + projectId))) {
@@ -107,24 +142,6 @@ public class FileUtils {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    public static void packZip(UUID projectId) throws IOException {
-        Path projectPath = Paths.get("projects/" + projectId);
-        ZipFile zipFile = new ZipFile(String.format("projects/%s/%s.zip", projectId, projectId));
-        try (Stream<Path> files = Files.list(projectPath)) {
-            files.forEach(f -> {
-                try {
-                    if (Files.isDirectory(f) && !f.toString().matches(".*" + projectId.toString() + "([\\\\/]\\.git.*)?")) {
-                        zipFile.addFolder(f.toFile());
-                    } else if (isAllowedFile(f.getFileName().toString())) {
-                        zipFile.addFile(f.toFile());
-                    }
-                } catch (ZipException e) {
-                    e.printStackTrace();
-                }
-            });
         }
     }
 

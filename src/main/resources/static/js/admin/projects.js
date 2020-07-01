@@ -4,13 +4,16 @@ angular
         $scope.projects = projects;
         $scope.searchOwner = "";
 
+        // Фильтр angularjsa для красивого поиска по имени владельца проекта
         $scope.ownerFilter = function (project) {
             let result = false;
             project.owners.forEach(p => p.match($scope.searchOwner) ? result = true : result);
             return result;
         };
 
+        //Остальные методы по имени понятно, что делают
         $scope.addOwner = function (projectId, creatorName) {
+            // директива data-if не скрывает элемент, а просто его не создаёт, так что лучше каждый раз заного его искать
             let email = document.querySelector("#add-" + projectId);
             if (email.value.length > 0) {
                 $http.post(`/admin/api/${projectId}/add-owner?email=${email.value}&owner=${creatorName}`).then(

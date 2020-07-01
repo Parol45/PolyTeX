@@ -5,6 +5,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Класс представляющий всю информацию о файле
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

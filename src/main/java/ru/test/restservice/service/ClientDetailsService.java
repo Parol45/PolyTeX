@@ -17,7 +17,11 @@ public class ClientDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final LogService logService;
-
+    /**
+     * Метод, описывающий логику получения spring-объекта User из БД
+     *
+     * @param email имя пользователя
+     */
     @Override
     public User loadUserByUsername(String email) {
         ru.test.restservice.entity.User user = userRepository.findByEmail(email)

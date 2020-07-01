@@ -1,5 +1,7 @@
 package ru.test.restservice.web;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.security.core.Authentication;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
+@Api(description="Контроллер отвечающий за страницы LaTeX проекта")
 public class ProjectController {
 
     private final ProjectService projectService;
@@ -26,11 +29,13 @@ public class ProjectController {
     private final TemplateRepository templateRepository;
 
     @GetMapping(value = {"", "/"})
+    @ApiOperation("Переадресация на страницу со списком проектов")
     public RedirectView redir() {
         return new RedirectView("/projects");
     }
 
     @GetMapping(value = "/projects")
+    @ApiOperation("Страница со списком проектов")
     public ModelAndView listProjects(Authentication auth) {
         ModelAndView projs = new ModelAndView("project/list");
         projs.addObject("projects", projectService.listProjectsFor(auth.getName()));
@@ -41,6 +46,7 @@ public class ProjectController {
     }
 
     @GetMapping("/projects/{projectId}/")
+    @ApiOperation("Страница LaTeX-редактора для конкретного проекта")
     public ModelAndView openProject(@PathVariable UUID projectId, Authentication auth) {
         projectService.getProjectForUser(projectId, auth.getName());
         ModelAndView main = new ModelAndView("project/editor");
@@ -49,6 +55,7 @@ public class ProjectController {
     }
 
     @GetMapping("/projects/{projectId}/history")
+    @ApiOperation("Страница истории изменения проекта")
     public ModelAndView showChangeHistory(@PathVariable UUID projectId, Authentication auth) throws IOException, GitAPIException {
         projectService.tryToRefreshLastAccessDate(projectId, auth.getName());
         ModelAndView hist = new ModelAndView("project/history");

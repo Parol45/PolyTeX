@@ -33,24 +33,39 @@ import static ru.test.restservice.utils.FileUtils.isTextFile;
 public class GitService {
 
     private final ProjectRepository projectRepository;
-
+    /**
+     * Метод, создающий новый git репозиторий
+     *
+     * @param path путь к директории для репозитория
+     */
     public void initRepository(String path) throws GitAPIException {
         Git git = Git.init().setDirectory(Paths.get(path).toFile()).call();
         git.add().addFilepattern(".").call();
         git.commit().setMessage("Initial commit").setAuthor("System", "System").call();
     }
-
+    /**
+     * Удаление файла из индексирования git
+     *
+     * @param path путь к git репозиторию
+     * @param pattern маска имени файла
+     */
     public void removeFile(String path, String pattern) throws IOException, GitAPIException {
         Git git = Git.open(new File(path + "/.git"));
         git.rm().addFilepattern(pattern).call();
     }
-
+    /**
+     * Коммит
+     */
     public void commit(String path, String message, String username) throws IOException, GitAPIException {
         Git git = Git.open(new File(path + "/.git"));
         git.add().addFilepattern(".").call();
         git.commit().setMessage(message).setAuthor(username, username).call();
     }
-
+    /**
+     * Список всех коммитов в репозитории
+     *
+     * @param path путь к репозиторию
+     */
     public List<CommitDTO> getCommitList(String path) throws IOException, GitAPIException {
         List<CommitDTO> result = new ArrayList<>();
         Git git = Git.open(new File(path + "/.git"));
@@ -77,7 +92,9 @@ public class GitService {
         }
         return result;
     }
-
+    /**
+     * Чтение содержимого файла по id
+     */
     public String getFileContents(String fileId, Repository repository) throws IOException {
         ObjectId objectId = ObjectId.fromString(fileId);
         ObjectLoader loader = repository.open(objectId);
@@ -92,14 +109,18 @@ public class GitService {
         }
         return textBuilder.toString();
     }
-
+    /**
+     * Возврат содержимого файла по его id
+     */
     public String getCommitFile(UUID projectId, String fileId) throws IOException {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         Git git = Git.open(new File(project.path + "/.git"));
         Repository repository = git.getRepository();
         return getFileContents(fileId, repository);
     }
-
+    /**
+     * Метод, возвращающий файл к состоянию одной из прошлых контрольных точек
+     */
     public List<FileItemDTO> rollback(UUID projectId, CommitDTO.File file, String commitDate, String username) throws IOException, GitAPIException {
         Project project = projectRepository.findById(projectId).orElseThrow(NotFoundException::new);
         Git git = Git.open(new File(project.path + "/.git"));

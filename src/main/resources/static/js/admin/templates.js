@@ -2,6 +2,7 @@ angular
     .module("app", [])
     .controller("ctrl", ['$scope', '$http', function ($scope, $http) {
 
+        // Сразу ищу элементы, чтобы удобнее было к ним обращаться
         let templateName = document.querySelector("#template-name");
         let templateDescription = document.querySelector("#template-description");
         let uploadFile = document.querySelector("#upload-file");
