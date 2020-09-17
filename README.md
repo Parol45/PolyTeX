@@ -1,6 +1,8 @@
 # PolyTeX
 Web-based LaTeX compiler/interpreter 
 https://latex.icst.spbstu.ru/
+(login/password: test/test)
+
 
 # TODO:
 
