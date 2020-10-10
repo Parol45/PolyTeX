@@ -1,11 +1,14 @@
 # PolyTeX
 Web-based LaTeX compiler/interpreter 
+https://latex.icst.spbstu.ru/
+(login/password: test/test)
+
 
 # TODO:
 
 ## Backend:
 
-1. Add documentation or comments to code.
+1. ???
 
 ## Frontend:
 
