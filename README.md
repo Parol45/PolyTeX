@@ -12,22 +12,22 @@ https://latex.icst.spbstu.ru/
 	- biber - сборщик библиографии (sudo apt install biber).
 
 2) Компиляция проекта:
-	* 2.1) Перейти в корень репозитория с исходным кодом;
-	* 2.2) Выполнить команду gradlew build;
-	* 2.3) Нужный в дальнейшем исполняемый .jar файл будет находиться в подкаталоге build\libs.
+	- 2.1) Перейти в корень репозитория с исходным кодом;
+	- 2.2) Выполнить команду gradlew build;
+	- 2.3) Нужный в дальнейшем исполняемый .jar файл будет находиться в подкаталоге build\libs.
 
 3) Запуск сервера приложения:
-	* 3.1) В каталоге с .jar файлом создать папки: config, database, projects и templates;
-	* 3.2) В папку config поместить application.yaml и application.properties из одноимённой папке в корне репозитория проекта.
-	* 3.3) Запустить программу командой java -jar ИМЯ_ИСПОЛНЯЕМОГО_ФАЙЛА или для работы в фоновом режиме сделать обёрточный сервис для программы(http://jcgonzalez.com/ubuntu-16-java-service-wrapper-example).
+	- 3.1) В каталоге с .jar файлом создать папки: config, database, projects и templates;
+	- 3.2) В папку config поместить application.yaml и application.properties из одноимённой папке в корне репозитория проекта.
+	- 3.3) Запустить программу командой java -jar ИМЯ_ИСПОЛНЯЕМОГО_ФАЙЛА или для работы в фоновом режиме сделать обёрточный сервис для программы(http://jcgonzalez.com/ubuntu-16-java-service-wrapper-example).
 	
 Примечания: 
-	1) application.properties содержит закомментированные параметры файла application.yaml, находящегося в репозитории,
-	2) для сброса всех данных приложения можно удалить содержимое папок database, projects и templates,
-	3) файлы проекта находятся в подпапке projects, имеющий имя соответствующее id проекта в базе данных,
-	4) для добавления пользователя-администратора в БД при запуске приложения необходимо при сборке проекта добавить файл data.sql по пути src\main\resources, который будет содержать строку вида: 
-		+ merge into USER(id, email, password, role, banned)
-		+ select '6fe763e29b8a11eabb370242ac130002', 'admin', 'Хэш пароля, полученный функцией BCryptPasswordEncoder(4).encode("пароль")', 'ROLE_ADMIN', 'FALSE' from DUAL;
+1) application.properties содержит закомментированные параметры файла application.yaml, находящегося в репозитории,
+2) для сброса всех данных приложения можно удалить содержимое папок database, projects и templates,
+3) файлы проекта находятся в подпапке projects, имеющий имя соответствующее id проекта в базе данных,
+4) для добавления пользователя-администратора в БД при запуске приложения необходимо при сборке проекта добавить файл data.sql по пути src\main\resources, который будет содержать строку вида: 
+- merge into USER(id, email, password, role, banned)
+- select '6fe763e29b8a11eabb370242ac130002', 'admin', 'Хэш пароля, полученный функцией BCryptPasswordEncoder(4).encode("пароль")', 'ROLE_ADMIN', 'FALSE' from DUAL;
 
 
 # TODO:
