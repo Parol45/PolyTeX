@@ -25,9 +25,9 @@ https://latex.icst.spbstu.ru/
 1) application.properties содержит закомментированные параметры файла application.yaml, находящегося в репозитории,
 2) для сброса всех данных приложения можно удалить содержимое папок database, projects и templates,
 3) файлы проекта находятся в подпапке projects, имеющий имя соответствующее id проекта в базе данных,
-4) для добавления пользователя-администратора в БД при запуске приложения необходимо при сборке проекта добавить файл data.sql по пути src\main\resources, который будет содержать строку вида: 
-- merge into USER(id, email, password, role, banned)
-- select '6fe763e29b8a11eabb370242ac130002', 'admin', 'Хэш пароля, полученный функцией BCryptPasswordEncoder(4).encode("пароль")', 'ROLE_ADMIN', 'FALSE' from DUAL;
+4) для добавления пользователя-администратора в БД при запуске приложения необходимо при сборке проекта добавить файл data.sql по пути src\main\resources, который будет содержать строку вида:
+    - merge into USER(id, email, password, role, banned)
+    - select '6fe763e29b8a11eabb370242ac130002', 'admin', 'Хэш пароля, полученный функцией BCryptPasswordEncoder(4).encode("пароль")', 'ROLE_ADMIN', 'FALSE' from DUAL;
 
 
 # TODO:
