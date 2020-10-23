@@ -18,8 +18,8 @@ https://latex.icst.spbstu.ru/
 
 3) Запуск сервера приложения:
 	- 3.1) В каталоге с .jar файлом создать папки: config, database, projects и templates;
-	- 3.2) В папку config поместить application.yaml и application.properties из одноимённой папке в корне репозитория проекта.
-	- 3.3) Запустить программу командой java -jar ИМЯ_ИСПОЛНЯЕМОГО_ФАЙЛА или для работы в фоновом режиме сделать обёрточный сервис для программы(http://jcgonzalez.com/ubuntu-16-java-service-wrapper-example).
+	- 3.2) В папку config поместить application.yaml и application.properties из одноимённой папки в корне репозитория проекта.
+	- 3.3) Запустить программу командой java -jar ИМЯ_ИСПОЛНЯЕМОГО_ФАЙЛА или для работы в фоновом режиме сделать обёрточный сервис для программы (http://jcgonzalez.com/ubuntu-16-java-service-wrapper-example).
 	
 Примечания: 
 1) application.yaml содержит некоторые закомментированные параметры файла, которые необходимо задать самостоятельно,
@@ -29,6 +29,8 @@ https://latex.icst.spbstu.ru/
     - merge into USER(id, email, password, role, banned)
     - select '6fe763e29b8a11eabb370242ac130002', 'admin', 'Хэш пароля, полученный функцией BCryptPasswordEncoder(4).encode("пароль")', 'ROLE_ADMIN', 'FALSE' from DUAL;
 
+## Special thanks to:
+# Donutellko
 
 # TODO:
 
