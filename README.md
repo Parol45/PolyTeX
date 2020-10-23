@@ -29,8 +29,10 @@ https://latex.icst.spbstu.ru/
     - merge into USER(id, email, password, role, banned)
     - select '6fe763e29b8a11eabb370242ac130002', 'admin', 'Хэш пароля, полученный функцией BCryptPasswordEncoder(4).encode("пароль")', 'ROLE_ADMIN', 'FALSE' from DUAL;
 
-## Special thanks to:
-# Donutellko
+### Special thanks to:
+## Donutellko
+
+
 
 # TODO:
 
