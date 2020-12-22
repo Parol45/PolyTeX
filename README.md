@@ -22,17 +22,14 @@ https://latex.icst.spbstu.ru/
 	- 3.3) Запустить программу командой java -jar ИМЯ_ИСПОЛНЯЕМОГО_ФАЙЛА или для работы в фоновом режиме сделать обёрточный сервис для программы (http://jcgonzalez.com/ubuntu-16-java-service-wrapper-example).
 	
 Примечания: 
-1) application.yaml содержит некоторые закомментированные параметры файла, которые необходимо задать самостоятельно,
+1) application.yml содержит некоторые закомментированные параметры файла, которые необходимо задать самостоятельно,
 2) для сброса всех данных приложения можно удалить содержимое папок database, projects и templates,
-3) файлы проекта находятся в подпапке projects, имеющий имя соответствующее id проекта в базе данных,
+3) файлы проекта находятся в подпапке projects, имеющей имя соответствующее id проекта в базе данных,
 4) для добавления пользователя-администратора в БД при запуске приложения необходимо при сборке проекта добавить файл data.sql по пути src\main\resources, который будет содержать строку вида:
     - merge into USER(id, email, password, role, banned)
     - select '6fe763e29b8a11eabb370242ac130002', 'admin', 'Хэш пароля, полученный функцией BCryptPasswordEncoder(4).encode("пароль")', 'ROLE_ADMIN', 'FALSE' from DUAL;
 
-### Special thanks to:
-## Donutellko
-
-
+### Special thanks to: [Donutellko](https://github.com/Donutellko)
 
 # TODO:
 
